@@ -1,0 +1,4 @@
+[submodule "GAEnergyOptimizer"]
+	path = GAEnergyOptimizer
+	url = https://github.com/DarkFighterLuke/GAEnergyOptimizer
+	branch = chatbot
