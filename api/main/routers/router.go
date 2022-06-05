@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
+	"greeny/main/controllers"
+	"greeny/main/utils"
 	"log"
 	"net/http"
 	"strings"
@@ -18,12 +19,11 @@ func Router() *mux.Router {
 
 // HandleWebhookRequest handles WebhookRequest and sends the WebhookResponse.
 func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
-	var request *dialogflow.WebhookRequest
-	var response *dialogflow.WebhookResponse
+	var request utils.WebhookRequest
+	var response utils.WebhookResponse
 	var err error
 
 	// Read input JSON
-	print(r.Body)
 	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
 		handleError(w, err)
 		return
@@ -35,7 +35,7 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	switch intent[len(intent)-1] {
 	// Use intent-id to identify it
 	case "<intent-id>":
-		response, err = getAgentName(request)
+		response, err = controllers.GetAgentName(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}
@@ -56,20 +56,4 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 func handleError(w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	fmt.Fprintf(w, "ERROR: %v", err)
-}
-
-// getAgentName creates a response for the get-agent-name intent.
-func getAgentName(request *dialogflow.WebhookRequest) (*dialogflow.WebhookResponse, error) {
-	response := &dialogflow.WebhookResponse{
-		FulfillmentMessages: []*dialogflow.Intent_Message{
-			{
-				Message: &dialogflow.Intent_Message_Text_{
-					Text: &dialogflow.Intent_Message_Text{
-						Text: []string{request.String()},
-					},
-				},
-			},
-		},
-	}
-	return response, nil
 }
