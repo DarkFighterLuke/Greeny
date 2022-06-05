@@ -12,17 +12,18 @@ import (
 
 func Router() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/Greeny/API", handleWebhookRequest).Methods("POST")
+	r.HandleFunc("/Greeny/api", handleWebhookRequest).Methods("POST")
 	return r
 }
 
 // HandleWebhookRequest handles WebhookRequest and sends the WebhookResponse.
 func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
-	var request dialogflow.WebhookRequest
-	var response dialogflow.WebhookResponse
+	var request *dialogflow.WebhookRequest
+	var response *dialogflow.WebhookResponse
 	var err error
 
 	// Read input JSON
+	print(r.Body)
 	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
 		handleError(w, err)
 		return
@@ -30,7 +31,6 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request: %+v", request)
 
 	// Call intent handler
-	print(request.QueryResult.Intent.Name)
 	intent := strings.Split(request.QueryResult.Intent.Name, "/")
 	switch intent[len(intent)-1] {
 	// Use intent-id to identify it
@@ -59,8 +59,8 @@ func handleError(w http.ResponseWriter, err error) {
 }
 
 // getAgentName creates a response for the get-agent-name intent.
-func getAgentName(request dialogflow.WebhookRequest) (dialogflow.WebhookResponse, error) {
-	response := dialogflow.WebhookResponse{
+func getAgentName(request *dialogflow.WebhookRequest) (*dialogflow.WebhookResponse, error) {
+	response := &dialogflow.WebhookResponse{
 		FulfillmentMessages: []*dialogflow.Intent_Message{
 			{
 				Message: &dialogflow.Intent_Message_Text_{
