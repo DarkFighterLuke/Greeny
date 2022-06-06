@@ -6,7 +6,8 @@ type Intent struct {
 }
 
 type QueryResult struct {
-	Intent Intent `json:"intent"`
+	Intent     Intent                       `json:"intent"`
+	Parameters map[string]map[string]string `json:"parameters"`
 }
 
 type Text struct {
