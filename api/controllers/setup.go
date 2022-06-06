@@ -59,8 +59,24 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 			FulfillmentMessages: []utils.Message{
 				{
 					Text: utils.Text{
-						Text: []string{"Username creato"},
+						Text: []string{"Hai davvero un bel nome! Penso che rimarrà impresso nei miei circuiti." +
+							"\nEssendo un nuovo arrivato ho bisogno di farti alcune domande per iniziare ad aiutarti." +
+							"\nSei pronto?"},
 					},
+				},
+			},
+			OutputContext: []utils.Context{
+				{
+					Name:          "setup",
+					LifespanCount: 5,
+				},
+				{
+					Name:          "ready_request",
+					LifespanCount: 1,
+				},
+				{
+					Name:          "Setup-Name-followup",
+					LifespanCount: 2,
 				},
 			},
 		}
