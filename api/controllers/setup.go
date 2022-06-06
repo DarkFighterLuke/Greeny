@@ -20,7 +20,7 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 
 	v := reflect.ValueOf(request.QueryResult.Parameters["username"])
 	if v.Kind() == reflect.Map {
-		path = path + v.MapIndex(reflect.ValueOf("name")).String()
+		path = path + request.QueryResult.Parameters["username"].(map[string]interface{})["name"].(string)
 		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 			err := os.Mkdir(path, os.ModePerm)
 			if err != nil {
@@ -28,7 +28,7 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 			}
 		}
 
-		f, err := os.Create(path + "/" + v.MapIndex(reflect.ValueOf("name")).String() + ".csv")
+		f, err := os.Create(path + "/" + request.QueryResult.Parameters["username"].(map[string]interface{})["name"].(string) + ".csv")
 		defer f.Close()
 		if err != nil {
 			return utils.WebhookResponse{}, err
