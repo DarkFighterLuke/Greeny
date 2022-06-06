@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/csv"
 	"errors"
 	"greeny/utils"
 	"os"
@@ -33,25 +32,94 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
-		records := [][]string{
-			{"appliance", "shiftable", "priority", "setup", "common_name"},
-			{"piano_cottura", "", "", "", "Piano cottura"},
-			{"forno", "", "", "", "Forno"},
-			{"microonde", "", "", "", "Microonde"},
-			{"computer_desktop", "", "", "", "Computer Desktop"},
-			{"caricabatterie_cellulare", "", "", "", "Caricabatterie per cellulare"},
-			{"televisione", "", "", "", "Televisore"},
-			{"scaldabagno", "", "", "", "Scaldabagno"},
-			{"condizionatore", "", "", "", "Condizionatore"},
-			{"lavatrice", "", "", "", "Lavatrice"},
-			{"asciugatrice", "", "", "", "Asciugatrice"},
-			{"lavastoviglie", "", "", "", "Lavastoviglie"},
-			{"aspirapolvere", "", "", "", "Aspirapolvere"},
+		summary := utils.Summary{
+			{
+				Appliance:  "piano_cottura",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Piano cottura",
+			},
+			{
+				Appliance:  "forno",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Forno",
+			},
+			{
+				Appliance:  "microonde",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Microonde",
+			},
+			{
+				Appliance:  "computer",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Computer Desktop",
+			},
+			{
+				Appliance:  "caricabatterie_cellulare",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Caricabatterie per cellulare",
+			},
+			{
+				Appliance:  "televisione",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Televisore",
+			},
+			{
+				Appliance:  "scaldabagno",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Scaldabagno",
+			},
+			{
+				Appliance:  "condizionatore",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Condizionatore",
+			},
+			{
+				Appliance:  "lavatrice",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Lavatrice",
+			},
+			{
+				Appliance:  "asciugatrice",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Asciugatrice",
+			},
+			{
+				Appliance:  "lavastoviglie",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Lavastoviglie",
+			},
+			{
+				Appliance:  "aspirapolvere",
+				Shiftable:  false,
+				Priority:   1,
+				SetupDone:  false,
+				CommonName: "Aspirapolvere",
+			},
 		}
-		w := csv.NewWriter(f)
-		defer w.Flush()
 
-		if err = w.WriteAll(records); err != nil {
+		if err = utils.WriteToCsv(&summary, path+"/"+request.QueryResult.Parameters["username"].(map[string]interface{})["name"].(string)+".csv"); err != nil {
 			return utils.WebhookResponse{}, err
 		}
 
@@ -86,8 +154,9 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 
 func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	var response utils.WebhookResponse
-	/*if request.QueryResult.Parameters[""] != "" {
-		response = utils.WebhookResponse{
+	if request.QueryResult.Parameters[""] != "" && request.QueryResult.Parameters["false"] == "" {
+		// TODO: Read summary file and check for the first unconfigured appliance
+		/*response = utils.WebhookResponse{
 			FulfillmentMessages: []utils.Message{
 				{
 					Text: utils.Text{
@@ -106,23 +175,23 @@ func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, erro
 					LifespanCount: 1,
 				},
 				{
-					Name:          "priority",
+					Name:          "appliance_priority_request",
 					LifespanCount: 1,
 				},
 			},
-		}
+		}*/
 	} else {
 		response = utils.WebhookResponse{
 			FulfillmentMessages: []utils.Message{
 				{
 					Text: utils.Text{
-						Text: []string{"Va bene alla prossima!"},
+						Text: []string{"Va bene, alla prossima!"},
 					},
 				},
 			},
 			OutputContext: []utils.Context{},
 		}
 	}
-	*/
+
 	return response, nil
 }
