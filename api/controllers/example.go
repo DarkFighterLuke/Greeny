@@ -1,6 +1,8 @@
 package controllers
 
-import "greeny/main/utils"
+import (
+	"greeny/utils"
+)
 
 // getAgentName creates a response for the get-agent-name intent.
 func GetAgentName(request utils.WebhookRequest) (utils.WebhookResponse, error) {

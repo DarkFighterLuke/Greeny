@@ -1,8 +1,8 @@
 package main
 
 import (
-	"greeny/main/routers"
-	"greeny/main/utils"
+	"greeny/routers"
+	"greeny/utils"
 	"log"
 	"net/http"
 	"time"

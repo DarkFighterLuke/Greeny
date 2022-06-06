@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"greeny/main/controllers"
-	"greeny/main/utils"
+	controllers2 "greeny/controllers"
+	"greeny/utils"
 	"log"
 	"net/http"
 	"strings"
@@ -35,13 +35,13 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	switch intent[len(intent)-1] {
 	// Use intent-id to identify it
 	case "<intent-id>":
-		response, err = controllers.GetAgentName(request)
+		response, err = controllers2.GetAgentName(request)
 	case "e7a823e2-b2ba-49c2-9caa-c7946ff647c2":
 		// create user
-		response, err = controllers.CreateUser(request)
+		response, err = controllers2.CreateUser(request)
 	case "063b3da9-3a2f-45bf-bda3-63eeb1939c82":
 		// ready for setup
-
+		response, err = controllers2.AmIReadyForSetup(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}

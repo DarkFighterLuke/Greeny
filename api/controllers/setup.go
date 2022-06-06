@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/csv"
 	"errors"
-	"greeny/main/utils"
+	"greeny/utils"
 	"os"
 )
 
@@ -64,7 +64,45 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	return response, nil
 }
 
-func imReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, error) {
-
-	return utils.WebhookResponse{}, nil
+func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+	var response utils.WebhookResponse
+	/*if request.QueryResult.Parameters[""] != "" {
+		response = utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Allora cominciamo!\n\n" +
+							"Sono riuscito a recuperare la lista degli elettrodomestici della casa, adesso ti" +
+							"chiederò per ciascuno di essi di esprimere che priorità hanno in relazione agli altri" +
+							"su una scala da 1 a 10 e se posso ripianificare la loro accensione in altre ore del" +
+							"giorno per farti risparmiare.\n" +
+							"Nella lista ho trovato l’elettrodomestico " + records[1][4] + ". Che priorità ha per te da 1 a 10?"},
+					},
+				},
+			},
+			OutputContext: []utils.Context{
+				{
+					Name:          "setup",
+					LifespanCount: 1,
+				},
+				{
+					Name:          "priority",
+					LifespanCount: 1,
+				},
+			},
+		}
+	} else {
+		response = utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Va bene alla prossima!"},
+					},
+				},
+			},
+			OutputContext: []utils.Context{},
+		}
+	}
+	*/
+	return response, nil
 }
