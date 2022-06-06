@@ -1,5 +1,18 @@
 package utils
 
+type Parameters interface {
+	ParametersMap
+	ParametersMapMap
+}
+
+type ParametersMap struct {
+	Value map[string]string
+}
+
+type ParametersMapMap struct {
+	Value map[string]map[string]string
+}
+
 type Intent struct {
 	DisplayName string `json:"displayName"`
 	Name        string `json:"name"`
@@ -18,6 +31,12 @@ type Message struct {
 	Text Text `json:"text"`
 }
 
+type Context struct {
+	Name          string            `json:"name"`
+	LifespanCount int               `json:"lifespanCount"`
+	Parameters    map[string]string `json:"parameters"`
+}
+
 // webhookRequest is used to unmarshal a WebhookRequest JSON object.
 type WebhookRequest struct {
 	Session     string      `json:"session"`
@@ -28,4 +47,5 @@ type WebhookRequest struct {
 // webhookResponse is used to marshal a WebhookResponse JSON object.
 type WebhookResponse struct {
 	FulfillmentMessages []Message `json:"fulfillmentMessages"`
+	OutputContext       []Context `json:"outputContext"`
 }
