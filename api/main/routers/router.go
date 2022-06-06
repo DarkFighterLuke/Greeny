@@ -37,8 +37,11 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "<intent-id>":
 		response, err = controllers.GetAgentName(request)
 	case "e7a823e2-b2ba-49c2-9caa-c7946ff647c2":
-		//create user
+		// create user
 		response, err = controllers.CreateUser(request)
+	case "063b3da9-3a2f-45bf-bda3-63eeb1939c82":
+		// ready for setup
+
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}
