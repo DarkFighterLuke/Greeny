@@ -27,11 +27,6 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 			}
 		}
 
-		f, err := os.Create(path + "/" + request.QueryResult.Parameters["username"].(map[string]interface{})["name"].(string) + ".csv")
-		defer f.Close()
-		if err != nil {
-			return utils.WebhookResponse{}, err
-		}
 		summary := utils.Summary{
 			{
 				Appliance:  "piano_cottura",
@@ -119,7 +114,7 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 			},
 		}
 
-		if err = utils.WriteToCsv(&summary, path+"/"+request.QueryResult.Parameters["username"].(map[string]interface{})["name"].(string)+".csv"); err != nil {
+		if err := utils.WriteToCsv(&summary, path+"/"+request.QueryResult.Parameters["username"].(map[string]interface{})["name"].(string)+".csv"); err != nil {
 			return utils.WebhookResponse{}, err
 		}
 
