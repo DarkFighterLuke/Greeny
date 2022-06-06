@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var configPath = "main/conf/conf.yml"
+var configPath = "conf/conf.yml"
 
 func main() {
 	err := utils.SetConfigPath(configPath)

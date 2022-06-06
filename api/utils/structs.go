@@ -1,26 +1,13 @@
 package utils
 
-type Parameters interface {
-	ParametersMap
-	ParametersMapMap
-}
-
-type ParametersMap struct {
-	Value map[string]string
-}
-
-type ParametersMapMap struct {
-	Value map[string]map[string]string
-}
-
 type Intent struct {
 	DisplayName string `json:"displayName"`
 	Name        string `json:"name"`
 }
 
 type QueryResult struct {
-	Intent     Intent                       `json:"intent"`
-	Parameters map[string]map[string]string `json:"parameters"`
+	Intent     Intent                 `json:"intent"`
+	Parameters map[string]interface{} `json:"parameters"`
 }
 
 type Text struct {
