@@ -17,7 +17,7 @@ type SummaryEntry struct {
 	CommonName string
 }
 
-func ParseSummary(entries [][]string) (Summary, error) {
+func parseSummary(entries [][]string) (Summary, error) {
 	summary := Summary{}
 	for _, entry := range entries {
 		shiftable, err := strconv.ParseBool(entry[1])
@@ -68,7 +68,7 @@ func ReadSummaryFile(pathToSummaryFile string) (Summary, error) {
 		return nil, err
 	}
 
-	summary, err := ParseSummary(entries)
+	summary, err := parseSummary(entries)
 	return summary, err
 }
 
@@ -82,12 +82,12 @@ func WriteToCsv(summary *Summary, path string) error {
 	w := csv.NewWriter(file)
 	defer w.Flush()
 
-	entries := To2DArray(summary)
+	entries := to2DArray(summary)
 	err = w.WriteAll(entries)
 	return err
 }
 
-func To2DArray(summary *Summary) [][]string {
+func to2DArray(summary *Summary) [][]string {
 	var array [][]string
 	for _, entry := range *summary {
 		arrayEntry := make([]string, 5)
