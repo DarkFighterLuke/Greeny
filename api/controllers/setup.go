@@ -150,7 +150,7 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 
 func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	var response utils.WebhookResponse
-	if request.QueryResult.Parameters[""] != "" && request.QueryResult.Parameters["false"] == "" {
+	if request.QueryResult.Parameters["false"] != nil && request.QueryResult.Parameters["false"] == "" {
 		userFolderName, err := utils.GetUserFolderPath()
 		if err != nil {
 			return utils.WebhookResponse{}, err
@@ -295,7 +295,7 @@ func ApplianceShiftability(request utils.WebhookRequest) (utils.WebhookResponse,
 		return utils.WebhookResponse{}, err
 	}
 
-	if request.QueryResult.Parameters[""] == "" {
+	if request.QueryResult.Parameters["true"] == nil || request.QueryResult.Parameters["false"] == nil {
 		return utils.WebhookResponse{
 			FulfillmentMessages: []utils.Message{
 				{
@@ -380,4 +380,60 @@ func ApplianceShiftability(request utils.WebhookRequest) (utils.WebhookResponse,
 			},
 		},
 	}, nil
+}
+
+func TemperatureSetters(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+	if request.QueryResult.Parameters["appliances"] != nil && len(request.QueryResult.Parameters["appliances"].([]interface{})) > 0 {
+		userFolderName, err := utils.GetUserFolderPath()
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		path := "data/" + userFolderName + "/" + userFolderName + ".csv"
+		summary, err := utils.ReadSummaryFile(path)
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		appliances := request.QueryResult.Parameters["appliances"].([]interface{})
+		for _, commonName := range appliances {
+			entry, err := utils.FindEntryByCommonName(&summary, commonName.(string))
+			if err != nil {
+				return utils.WebhookResponse{
+					FulfillmentMessages: []utils.Message{
+						{
+							Text: utils.Text{
+								Text: []string{"Non ho trovato gli elettrodomestici di cui parli. Se vuoi che ti ripeta la lista basta dirlo!"},
+							},
+						},
+					},
+					OutputContext: []utils.Context{
+						{
+							Name:          "setup",
+							LifespanCount: 1,
+						},
+						{
+							Name:          "temperature_setters_request",
+							LifespanCount: 1,
+						},
+					},
+				}, nil
+			}
+			entry.TemperatureSetter = true
+		}
+
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Afferrato!" +
+							"\nGrazie per tua pazienza Elisabetta e scusami se sono stato chiacchierone." +
+							"\nTi ricordo che i tuoi dati sono al sicuro con me, non dirò a nessuno del nostro segreto per risparmiare."},
+					},
+				},
+			},
+		}, nil
+	} else {
+		return utils.WebhookResponse{}, fmt.Errorf("no parameters have been supplied")
+	}
 }
