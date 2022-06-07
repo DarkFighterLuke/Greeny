@@ -45,6 +45,8 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "833bdcb2-83f7-4224-92b5-8d1de3319660":
 		// appliance priority
 		response, err = controllers2.AppliancePriority(request)
+	case "7b1a49f1-8243-4199-b1d6-84a0f2587f38":
+		response, err = controllers2.ApplianceShiftability(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}

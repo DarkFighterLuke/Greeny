@@ -252,7 +252,6 @@ func AppliancePriority(request utils.WebhookRequest) (utils.WebhookResponse, err
 	}
 
 	unconfigured.Priority = int(priority)
-	fmt.Printf("%#v", summary)
 	err = utils.WriteToCsv(&summary, path)
 	if err != nil {
 		return utils.WebhookResponse{}, err
@@ -273,6 +272,110 @@ func AppliancePriority(request utils.WebhookRequest) (utils.WebhookResponse, err
 			},
 			{
 				Name:          "appliance_shiftability_request",
+				LifespanCount: 1,
+			},
+		},
+	}, nil
+}
+
+func ApplianceShiftability(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+	userFolderName, err := utils.GetUserFolderPath()
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	path := "data/" + userFolderName + "/" + userFolderName + ".csv"
+	summary, err := utils.ReadSummaryFile(path)
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	unconfigured, err := utils.FindFirstUnconfigured(&summary)
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	if request.QueryResult.Parameters[""] == "" {
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Non ho capito ciò che hai detto...\n" +
+							"Posso ripianificare la sua accensione in altre ore del giorno?"},
+					},
+				},
+			},
+			OutputContext: []utils.Context{
+				{
+					Name:          "setup",
+					LifespanCount: 1,
+				},
+				{
+					Name:          "Setup-ReadyAnswer-followup",
+					LifespanCount: 1,
+				},
+				{
+					Name:          "Setup-AppliancePriority-followup",
+					LifespanCount: 1,
+				},
+				{
+					Name:          "appliance_shiftability_request",
+					LifespanCount: 1,
+				},
+			},
+		}, nil
+	} else if request.QueryResult.Parameters["false"] == "" {
+		unconfigured.Shiftable = true
+		unconfigured.SetupDone = true
+	} else {
+		unconfigured.SetupDone = true
+	}
+
+	err = utils.WriteToCsv(&summary, path)
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	unconfigured, err = utils.FindFirstUnconfigured(&summary)
+	if err != nil {
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Grazie per la pazienza.\n" +
+							"Potresti dirmi ora quali elettrodomestici tra quelli citati usi " +
+							"per regolare la temperatura della casa?"},
+					},
+				},
+			},
+			OutputContext: []utils.Context{
+				{
+					Name:          "setup",
+					LifespanCount: 1,
+				},
+				{
+					Name:          "temperature_setters_request",
+					LifespanCount: 1,
+				},
+			},
+		}, nil
+	}
+	return utils.WebhookResponse{
+		FulfillmentMessages: []utils.Message{
+			{
+				Text: utils.Text{
+					Text: []string{"Afferrato!\n" +
+						"Ho trovato l’elettrodomestico " + unconfigured.CommonName + ". Che priorità ha per te da 1 a 10?"},
+				},
+			},
+		},
+		OutputContext: []utils.Context{
+			{
+				Name:          "setup",
+				LifespanCount: 1,
+			},
+			{
+				Name:          "appliance_priority_request",
 				LifespanCount: 1,
 			},
 		},
