@@ -451,7 +451,7 @@ func RepeatAppliances(request utils.WebhookRequest) (utils.WebhookResponse, erro
 		responseMessage += entry.CommonName
 	}
 
-	responseMessage += "\nQuale di questi usi per regolare la temperatura della casa?"
+	responseMessage += ".\nQuale di questi usi per regolare la temperatura della casa?"
 
 	return utils.WebhookResponse{
 		FulfillmentMessages: []utils.Message{
