@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	controllers2 "greeny/controllers"
+	"greeny/controllers"
 	"greeny/utils"
 	"log"
 	"net/http"
@@ -35,25 +35,25 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	switch intent[len(intent)-1] {
 	// Use intent-id to identify it
 	case "<intent-id>":
-		response, err = controllers2.GetAgentName(request)
+		response, err = controllers.GetAgentName(request)
 	case "e7a823e2-b2ba-49c2-9caa-c7946ff647c2":
 		// Setup - Name
-		response, err = controllers2.CreateUser(request)
+		response, err = controllers.CreateUser(request)
 	case "063b3da9-3a2f-45bf-bda3-63eeb1939c82":
 		// Setup - Ready answer
-		response, err = controllers2.AmIReadyForSetup(request)
+		response, err = controllers.AmIReadyForSetup(request)
 	case "833bdcb2-83f7-4224-92b5-8d1de3319660":
 		// Setup - Appliance priority
-		response, err = controllers2.AppliancePriority(request)
+		response, err = controllers.AppliancePriority(request)
 	case "7b1a49f1-8243-4199-b1d6-84a0f2587f38":
 		// Setup - Appliance shiftability
-		response, err = controllers2.ApplianceShiftability(request)
+		response, err = controllers.ApplianceShiftability(request)
 	case "3cd37b30-e6f4-4730-94df-f0ab8cbf1dd1":
 		// Setup - Temperature setters
-		response, err = controllers2.TemperatureSetters(request)
+		response, err = controllers.TemperatureSetters(request)
 	case "cc0fd5cb-7568-4f78-97e7-81b931284019":
 		// Setup - Repeat appliances
-		response, err = controllers2.RepeatAppliances(request)
+		response, err = controllers.RepeatAppliances(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}
