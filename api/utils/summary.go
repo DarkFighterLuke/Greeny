@@ -73,7 +73,7 @@ func ReadSummaryFile(pathToSummaryFile string) (Summary, error) {
 }
 
 func WriteToCsv(summary *Summary, path string) error {
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0777)
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
