@@ -224,7 +224,7 @@ func AppliancePriority(request utils.WebhookRequest) (utils.WebhookResponse, err
 					LifespanCount: 1,
 				},
 			},
-		}, fmt.Errorf("priority number out of allowed range")
+		}, nil
 	}
 
 	userFolderName, err := utils.GetUserFolderPath()
