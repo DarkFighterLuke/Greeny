@@ -437,3 +437,46 @@ func TemperatureSetters(request utils.WebhookRequest) (utils.WebhookResponse, er
 		return utils.WebhookResponse{}, fmt.Errorf("no parameters have been supplied")
 	}
 }
+
+func RepeatAppliances(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+	userFolderName, err := utils.GetUserFolderPath()
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	path := "data/" + userFolderName + "/" + userFolderName + ".csv"
+	summary, err := utils.ReadSummaryFile(path)
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	responseMessage := "Non c'è problema! Gli elettrodomestici nella tua casa sono: "
+	for i, entry := range summary {
+		if i != 0 {
+			responseMessage += ", "
+		}
+		responseMessage += entry.CommonName
+	}
+
+	responseMessage += "\nQuale di questi usi per regolare la temperatura della casa?"
+
+	return utils.WebhookResponse{
+		FulfillmentMessages: []utils.Message{
+			{
+				Text: utils.Text{
+					Text: []string{responseMessage},
+				},
+			},
+		},
+		OutputContext: []utils.Context{
+			{
+				Name:          "setup",
+				LifespanCount: 1,
+			},
+			{
+				Name:          "temperature_setters_request",
+				LifespanCount: 1,
+			},
+		},
+	}, nil
+}

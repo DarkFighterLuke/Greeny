@@ -37,19 +37,23 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "<intent-id>":
 		response, err = controllers2.GetAgentName(request)
 	case "e7a823e2-b2ba-49c2-9caa-c7946ff647c2":
-		// create user
+		// Setup - Name
 		response, err = controllers2.CreateUser(request)
 	case "063b3da9-3a2f-45bf-bda3-63eeb1939c82":
-		// ready for setup
+		// Setup - Ready answer
 		response, err = controllers2.AmIReadyForSetup(request)
 	case "833bdcb2-83f7-4224-92b5-8d1de3319660":
-		// appliance priority
+		// Setup - Appliance priority
 		response, err = controllers2.AppliancePriority(request)
 	case "7b1a49f1-8243-4199-b1d6-84a0f2587f38":
-		// appliance shiftability
+		// Setup - Appliance shiftability
 		response, err = controllers2.ApplianceShiftability(request)
 	case "3cd37b30-e6f4-4730-94df-f0ab8cbf1dd1":
+		// Setup - Temperature setters
 		response, err = controllers2.TemperatureSetters(request)
+	case "cc0fd5cb-7568-4f78-97e7-81b931284019":
+		// Setup - Repeat appliances
+		response, err = controllers2.RepeatAppliances(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}
