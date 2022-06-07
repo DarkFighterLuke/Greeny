@@ -150,17 +150,31 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	var response utils.WebhookResponse
 	if request.QueryResult.Parameters[""] != "" && request.QueryResult.Parameters["false"] == "" {
-		// TODO: Read summary file and check for the first unconfigured appliance
-		/*response = utils.WebhookResponse{
+		userFolderName, err := utils.GetUserFolderPath()
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		summary, err := utils.ReadSummaryFile("data/" + userFolderName + "/" + userFolderName + ".csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		unconfigured, err := utils.FindFirstUnconfigured(&summary)
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		response = utils.WebhookResponse{
 			FulfillmentMessages: []utils.Message{
 				{
 					Text: utils.Text{
 						Text: []string{"Allora cominciamo!\n\n" +
-							"Sono riuscito a recuperare la lista degli elettrodomestici della casa, adesso ti" +
-							"chiederò per ciascuno di essi di esprimere che priorità hanno in relazione agli altri" +
-							"su una scala da 1 a 10 e se posso ripianificare la loro accensione in altre ore del" +
+							"Sono riuscito a recuperare la lista degli elettrodomestici della casa, adesso ti " +
+							"chiederò per ciascuno di essi di esprimere che priorità hanno in relazione agli altri " +
+							"su una scala da 1 a 10 e se posso ripianificare la loro accensione in altre ore del " +
 							"giorno per farti risparmiare.\n" +
-							"Nella lista ho trovato l’elettrodomestico " + records[1][4] + ". Che priorità ha per te da 1 a 10?"},
+							"Nella lista ho trovato l’elettrodomestico " + unconfigured.CommonName + ". Che priorità ha per te da 1 a 10?"},
 					},
 				},
 			},
@@ -174,7 +188,7 @@ func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, erro
 					LifespanCount: 1,
 				},
 			},
-		}*/
+		}
 	} else {
 		response = utils.WebhookResponse{
 			FulfillmentMessages: []utils.Message{
