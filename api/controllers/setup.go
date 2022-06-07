@@ -115,7 +115,7 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 			},
 		}
 
-		if err := utils.WriteToCsv(&summary, path+"/"+request.QueryResult.Parameters["username"].(map[string]interface{})["name"].(string)+".csv"); err != nil {
+		if err := utils.WriteToCsv(&summary, path+"/"+"summary.csv"); err != nil {
 			return utils.WebhookResponse{}, err
 		}
 
@@ -156,7 +156,7 @@ func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, erro
 			return utils.WebhookResponse{}, err
 		}
 
-		summary, err := utils.ReadSummaryFile("data/" + userFolderName + "/" + userFolderName + ".csv")
+		summary, err := utils.ReadSummaryFile("data/" + userFolderName + "/" + "summary.csv")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
@@ -240,7 +240,7 @@ func AppliancePriority(request utils.WebhookRequest) (utils.WebhookResponse, err
 		return utils.WebhookResponse{}, err
 	}
 
-	path := "data/" + userFolderName + "/" + userFolderName + ".csv"
+	path := "data/" + userFolderName + "/" + "summary.csv"
 	summary, err := utils.ReadSummaryFile(path)
 	if err != nil {
 		return utils.WebhookResponse{}, err
@@ -284,7 +284,7 @@ func ApplianceShiftability(request utils.WebhookRequest) (utils.WebhookResponse,
 		return utils.WebhookResponse{}, err
 	}
 
-	path := "data/" + userFolderName + "/" + userFolderName + ".csv"
+	path := "data/" + userFolderName + "/" + "summary.csv"
 	summary, err := utils.ReadSummaryFile(path)
 	if err != nil {
 		return utils.WebhookResponse{}, err
@@ -389,7 +389,7 @@ func TemperatureSetters(request utils.WebhookRequest) (utils.WebhookResponse, er
 			return utils.WebhookResponse{}, err
 		}
 
-		path := "data/" + userFolderName + "/" + userFolderName + ".csv"
+		path := "data/" + userFolderName + "/" + "summary.csv"
 		summary, err := utils.ReadSummaryFile(path)
 		if err != nil {
 			return utils.WebhookResponse{}, err
@@ -444,7 +444,7 @@ func RepeatAppliances(request utils.WebhookRequest) (utils.WebhookResponse, erro
 		return utils.WebhookResponse{}, err
 	}
 
-	path := "data/" + userFolderName + "/" + userFolderName + ".csv"
+	path := "data/" + userFolderName + "/" + "summary.csv"
 	summary, err := utils.ReadSummaryFile(path)
 	if err != nil {
 		return utils.WebhookResponse{}, err
@@ -480,3 +480,9 @@ func RepeatAppliances(request utils.WebhookRequest) (utils.WebhookResponse, erro
 		},
 	}, nil
 }
+
+// TODO: Generate shiftable and non-shiftable files
+// TODO: Generate optimal schedule
+// TODO: Copy file with random internal and external temperatures
+// TODO: Copy file with user preferred time slots
+// TODO: Copy file with PV production
