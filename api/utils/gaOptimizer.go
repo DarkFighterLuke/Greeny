@@ -2,7 +2,9 @@ package utils
 
 import (
 	"encoding/csv"
+	"errors"
 	"os"
+	"os/exec"
 )
 
 const (
@@ -18,7 +20,7 @@ func GenerateConsumptionsFiles() error {
 		return err
 	}
 
-	path := "data/" + userFolderName + "/" + userFolderName + ".csv"
+	path := "data/" + userFolderName + "/" + "summary.csv"
 	summary, err := ReadSummaryFile(path)
 	if err != nil {
 		return err
@@ -66,6 +68,26 @@ func GenerateConsumptionsFiles() error {
 	w = csv.NewWriter(nonShiftableFile)
 	defer w.Flush()
 	err = w.WriteAll(simulationEntries[nonShiftableStart:nonShiftableEnd])
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GenerateOptimalSchedule(shiftablePath, nonShiftablePath, optimizedSchedulePath string) error {
+	if _, err := os.Stat("../GAEnergyOptimizer/venv"); errors.Is(err, os.ErrNotExist) {
+		_, err := exec.Command("python3", "-m", "venv", "../GAEnergyOptimizer/venv").Output()
+		if err != nil {
+			return err
+		}
+		_, err = exec.Command("../GAEnergyOptimizer/venv/bin/pip3", "install", "-r", "../GAEnergyOptimizer/requirements.txt").Output()
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err := exec.Command("../GAEnergyOptimizer/venv/bin/python3", "../GAEnergyOptimizer/main.py", shiftablePath, nonShiftablePath, "data/user_preferred_time_slots.csv", "-o", optimizedSchedulePath).Output()
 	if err != nil {
 		return err
 	}
