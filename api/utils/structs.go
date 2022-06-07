@@ -34,5 +34,5 @@ type WebhookRequest struct {
 // webhookResponse is used to marshal a WebhookResponse JSON object.
 type WebhookResponse struct {
 	FulfillmentMessages []Message `json:"fulfillmentMessages"`
-	OutputContext       []Context `json:"outputContext"`
+	OutputContext       []Context `json:"outputContexts"`
 }
