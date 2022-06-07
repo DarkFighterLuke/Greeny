@@ -48,9 +48,9 @@ func ParseSummary(entries [][]string) (Summary, error) {
 }
 
 func FindFirstUnconfigured(summary *Summary) (*SummaryEntry, error) {
-	for _, entry := range *summary {
+	for i, entry := range *summary {
 		if !entry.SetupDone {
-			return &entry, nil
+			return &(*summary)[i], nil
 		}
 	}
 	return nil, fmt.Errorf("all entries are configured")
