@@ -10,11 +10,12 @@ import (
 type Summary = []SummaryEntry
 
 type SummaryEntry struct {
-	Appliance  string
-	Shiftable  bool
-	Priority   int
-	SetupDone  bool
-	CommonName string
+	Appliance         string
+	Shiftable         bool
+	Priority          int
+	SetupDone         bool
+	TemperatureSetter bool
+	CommonName        string
 }
 
 func parseSummary(entries [][]string) (Summary, error) {
@@ -35,12 +36,17 @@ func parseSummary(entries [][]string) (Summary, error) {
 		if err != nil {
 			return nil, err
 		}
+		temperatureSetter, err := strconv.ParseBool(entry[5])
+		if err != nil {
+			return nil, err
+		}
 		summaryEntry := SummaryEntry{
-			Appliance:  entry[0],
-			Shiftable:  shiftable,
-			Priority:   int(priority),
-			SetupDone:  setupDone,
-			CommonName: entry[4],
+			Appliance:         entry[0],
+			Shiftable:         shiftable,
+			Priority:          int(priority),
+			SetupDone:         setupDone,
+			CommonName:        entry[4],
+			TemperatureSetter: temperatureSetter,
 		}
 		summary = append(summary, summaryEntry)
 	}
@@ -90,12 +96,13 @@ func WriteToCsv(summary *Summary, path string) error {
 func to2DArray(summary *Summary) [][]string {
 	var array [][]string
 	for _, entry := range *summary {
-		arrayEntry := make([]string, 5)
+		arrayEntry := make([]string, 6)
 		arrayEntry[0] = entry.Appliance
 		arrayEntry[1] = strconv.FormatBool(entry.Shiftable)
 		arrayEntry[2] = strconv.Itoa(entry.Priority)
 		arrayEntry[3] = strconv.FormatBool(entry.SetupDone)
-		arrayEntry[4] = entry.CommonName
+		arrayEntry[4] = strconv.FormatBool(entry.TemperatureSetter)
+		arrayEntry[5] = entry.CommonName
 		array = append(array, arrayEntry)
 	}
 	return array
