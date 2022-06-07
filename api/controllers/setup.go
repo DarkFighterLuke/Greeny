@@ -422,6 +422,15 @@ func TemperatureSetters(request utils.WebhookRequest) (utils.WebhookResponse, er
 			entry.TemperatureSetter = true
 		}
 
+		err = utils.GenerateConsumptionsFiles()
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		err = utils.GenerateOptimalSchedule("data/"+userFolderName+"/shiftable.csv", "data/"+userFolderName+"/non-shiftable.csv", "data/"+userFolderName+"/optimal-schedule.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
 		return utils.WebhookResponse{
 			FulfillmentMessages: []utils.Message{
 				{
@@ -481,8 +490,4 @@ func RepeatAppliances(request utils.WebhookRequest) (utils.WebhookResponse, erro
 	}, nil
 }
 
-// TODO: Generate shiftable and non-shiftable files
-// TODO: Generate optimal schedule
-// TODO: Copy file with random internal and external temperatures
-// TODO: Copy file with user preferred time slots
 // TODO: Copy file with PV production
