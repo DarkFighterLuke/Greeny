@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"greeny/utils"
 	"os"
 	"reflect"
@@ -203,4 +204,77 @@ func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, erro
 	}
 
 	return response, nil
+}
+
+func AppliancePriority(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+	priority := request.QueryResult.Parameters["priority"].(float64)
+	if priority < 1 || priority > 10 {
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"I miei circuiti non riescono a comprendere il numero che hai specificato. " +
+							"Potresti ripetere la priorità su una scala da 1 a 10?"},
+					},
+				},
+			},
+			OutputContext: []utils.Context{
+				{
+					Name:          "setup",
+					LifespanCount: 1,
+				},
+				{
+					Name:          "Setup-ReadyAnswer-followup",
+					LifespanCount: 1,
+				},
+				{
+					Name:          "appliance_priority_request",
+					LifespanCount: 1,
+				},
+			},
+		}, fmt.Errorf("priority number out of allowed range")
+	}
+
+	userFolderName, err := utils.GetUserFolderPath()
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	path := "data/" + userFolderName + "/" + userFolderName + ".csv"
+	summary, err := utils.ReadSummaryFile(path)
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	unconfigured, err := utils.FindFirstUnconfigured(&summary)
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	unconfigured.Priority = int(priority)
+	fmt.Printf("%#v", summary)
+	err = utils.WriteToCsv(&summary, path)
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	return utils.WebhookResponse{
+		FulfillmentMessages: []utils.Message{
+			{
+				Text: utils.Text{
+					Text: []string{"Bene.\nPosso ripianificare la sua accensione in altre ore del giorno?"},
+				},
+			},
+		},
+		OutputContext: []utils.Context{
+			{
+				Name:          "setup",
+				LifespanCount: 1,
+			},
+			{
+				Name:          "appliance_shiftability_request",
+				LifespanCount: 1,
+			},
+		},
+	}, nil
 }
