@@ -138,10 +138,6 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 					Name:          request.Session + "/contexts/ready_request",
 					LifespanCount: 1,
 				},
-				{
-					Name:          request.Session + "/contexts/Setup-Name-followup",
-					LifespanCount: 2,
-				},
 			},
 		}
 	}
@@ -221,10 +217,6 @@ func AppliancePriority(request utils.WebhookRequest) (utils.WebhookResponse, err
 			OutputContext: []utils.Context{
 				{
 					Name:          request.Session + "/contexts/setup",
-					LifespanCount: 1,
-				},
-				{
-					Name:          request.Session + "/contexts/Setup-ReadyAnswer-followup",
 					LifespanCount: 1,
 				},
 				{
@@ -308,14 +300,6 @@ func ApplianceShiftability(request utils.WebhookRequest) (utils.WebhookResponse,
 			OutputContext: []utils.Context{
 				{
 					Name:          request.Session + "/contexts/setup",
-					LifespanCount: 1,
-				},
-				{
-					Name:          request.Session + "/contexts/Setup-ReadyAnswer-followup",
-					LifespanCount: 1,
-				},
-				{
-					Name:          request.Session + "/contexts/Setup-AppliancePriority-followup",
 					LifespanCount: 1,
 				},
 				{
