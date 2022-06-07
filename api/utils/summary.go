@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Summary = []SummaryEntry
@@ -36,7 +37,7 @@ func parseSummary(entries [][]string) (Summary, error) {
 		if err != nil {
 			return nil, err
 		}
-		temperatureSetter, err := strconv.ParseBool(entry[5])
+		temperatureSetter, err := strconv.ParseBool(entry[4])
 		if err != nil {
 			return nil, err
 		}
@@ -45,8 +46,8 @@ func parseSummary(entries [][]string) (Summary, error) {
 			Shiftable:         shiftable,
 			Priority:          int(priority),
 			SetupDone:         setupDone,
-			CommonName:        entry[4],
 			TemperatureSetter: temperatureSetter,
+			CommonName:        entry[5],
 		}
 		summary = append(summary, summaryEntry)
 	}
@@ -106,4 +107,13 @@ func to2DArray(summary *Summary) [][]string {
 		array = append(array, arrayEntry)
 	}
 	return array
+}
+
+func FindEntryByCommonName(summary *Summary, commonName string) (*SummaryEntry, error) {
+	for i, entry := range *summary {
+		if strings.ToLower(entry.CommonName) == strings.ToLower(commonName) {
+			return &(*summary)[i], nil
+		}
+	}
+	return nil, fmt.Errorf("no entries found with the given common name")
 }
