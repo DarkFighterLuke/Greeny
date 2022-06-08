@@ -117,3 +117,23 @@ func FindEntryByCommonName(summary *Summary, commonName string) (*SummaryEntry, 
 	}
 	return nil, fmt.Errorf("no entries found with the given common name")
 }
+
+func GetShiftableEntries(summary *Summary) Summary {
+	var shiftableEntries Summary
+	for _, entry := range *summary {
+		if entry.Shiftable {
+			shiftableEntries = append(shiftableEntries, entry)
+		}
+	}
+	return shiftableEntries
+}
+
+func GetNonShiftableEntries(summary *Summary) Summary {
+	var nonShiftableEntries Summary
+	for _, entry := range *summary {
+		if !entry.Shiftable {
+			nonShiftableEntries = append(nonShiftableEntries, entry)
+		}
+	}
+	return nonShiftableEntries
+}

@@ -1,17 +1,9 @@
 package utils
 
 import (
-	"encoding/csv"
 	"errors"
 	"os"
 	"os/exec"
-)
-
-const (
-	nonShiftableStart = 1
-	nonShiftableEnd   = 9
-	shiftableStart    = 9
-	shiftableEnd      = 13
 )
 
 func GenerateConsumptionsFiles() error {
@@ -20,54 +12,42 @@ func GenerateConsumptionsFiles() error {
 		return err
 	}
 
-	path := "data/" + userFolderName + "/" + "summary.csv"
-	summary, err := ReadSummaryFile(path)
+	basePath := "data/" + userFolderName + "/"
+	summary, err := ReadSummaryFile(basePath + "summary.csv")
 	if err != nil {
 		return err
 	}
 
-	var shiftableSummary Summary
-	var nonShiftableSummary Summary
-	for _, entry := range summary {
-		if entry.Shiftable {
-			shiftableSummary = append(shiftableSummary, entry)
-		} else {
-			nonShiftableSummary = append(nonShiftableSummary, entry)
+	simulationConsumptions, err := ReadConsumptions("data/simulation.csv")
+	if err != nil {
+		return err
+	}
+
+	shiftableEntries := GetShiftableEntries(&summary)
+	var shiftableConsumptions Consumptions
+	for _, entry := range shiftableEntries {
+		entryConsumptions, err := FindConsumptionsByApplianceName(&simulationConsumptions, entry.CommonName)
+		if err != nil {
+			continue
 		}
+		shiftableConsumptions = append(shiftableConsumptions, *entryConsumptions)
 	}
-
-	file, err := os.Open("data/simulation.csv")
+	err = WriteConsumptionsToCsv(&shiftableConsumptions, basePath+"shiftable.csv")
 	if err != nil {
 		return err
 	}
 
-	r := csv.NewReader(file)
-	simulationEntries, err := r.ReadAll()
-	if err != nil {
-		return err
+	nonShiftableEntries := GetNonShiftableEntries(&summary)
+	var nonShiftableConsumptions Consumptions
+	for _, entry := range nonShiftableEntries {
+		entryConsumptions, err := FindConsumptionsByApplianceName(&simulationConsumptions, entry.CommonName)
+		if err != nil {
+			continue
+		}
+		nonShiftableConsumptions = append(nonShiftableConsumptions, *entryConsumptions)
 	}
-
-	path = "data/" + userFolderName
-	shiftableFile, err := os.OpenFile(path+"/shiftable.csv", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer shiftableFile.Close()
-	w := csv.NewWriter(shiftableFile)
-	defer w.Flush()
-	err = w.WriteAll(simulationEntries[shiftableStart:shiftableEnd])
-	if err != nil {
-		return err
-	}
-
-	nonShiftableFile, err := os.OpenFile(path+"/non-shiftable.csv", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer nonShiftableFile.Close()
-	w = csv.NewWriter(nonShiftableFile)
-	defer w.Flush()
-	err = w.WriteAll(simulationEntries[nonShiftableStart:nonShiftableEnd])
+	nonShiftableConsumptions = append(nonShiftableConsumptions, simulationConsumptions[len(simulationConsumptions)-2:]...)
+	err = WriteConsumptionsToCsv(&nonShiftableConsumptions, basePath+"non-shiftable.csv")
 	if err != nil {
 		return err
 	}

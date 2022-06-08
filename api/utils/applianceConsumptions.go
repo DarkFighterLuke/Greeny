@@ -63,6 +63,43 @@ func FindConsumptionsByApplianceName(consumptions *Consumptions, commonName stri
 	return nil, fmt.Errorf("no appliance found with the given name")
 }
 
+func WriteConsumptionsToCsv(consumptions *Consumptions, path string) error {
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	w := csv.NewWriter(file)
+	defer w.Flush()
+
+	entries := consumptionsTo2DArray(consumptions)
+	err = w.WriteAll(entries)
+	return err
+}
+
+func consumptionsTo2DArray(consumptions *Consumptions) [][]string {
+	var array [][]string
+	array = append(array, getTimeHeaderArray())
+	for _, entry := range *consumptions {
+		var arrayEntry []string
+		arrayEntry = append(arrayEntry, entry.ApplianceName)
+		for i := 0; i < 24; i++ {
+			arrayEntry = append(arrayEntry, fmt.Sprintf("%.2f", entry.HourlyConsumptions[i]))
+		}
+		array = append(array, arrayEntry)
+	}
+	return array
+}
+
+func getTimeHeaderArray() []string {
+	timeArray := []string{"Orario"}
+	for i := 0; i < 24; i++ {
+		timeArray = append(timeArray, fmt.Sprintf("%d", i))
+	}
+	return timeArray
+}
+
 func (ce *ConsumptionEntry) IsTurnedOn(hour int) (bool, error) {
 	if hour < 0 || hour > 23 {
 		return false, fmt.Errorf("hour out of range")
