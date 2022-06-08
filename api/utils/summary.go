@@ -89,12 +89,12 @@ func WriteToCsv(summary *Summary, path string) error {
 	w := csv.NewWriter(file)
 	defer w.Flush()
 
-	entries := to2DArray(summary)
+	entries := summaryTo2DArray(summary)
 	err = w.WriteAll(entries)
 	return err
 }
 
-func to2DArray(summary *Summary) [][]string {
+func summaryTo2DArray(summary *Summary) [][]string {
 	var array [][]string
 	for _, entry := range *summary {
 		arrayEntry := make([]string, 6)
@@ -109,7 +109,7 @@ func to2DArray(summary *Summary) [][]string {
 	return array
 }
 
-func FindEntryByCommonName(summary *Summary, commonName string) (*SummaryEntry, error) {
+func FindSummaryEntryByCommonName(summary *Summary, commonName string) (*SummaryEntry, error) {
 	for i, entry := range *summary {
 		if strings.ToLower(entry.CommonName) == strings.ToLower(commonName) {
 			return &(*summary)[i], nil
@@ -118,7 +118,7 @@ func FindEntryByCommonName(summary *Summary, commonName string) (*SummaryEntry, 
 	return nil, fmt.Errorf("no entries found with the given common name")
 }
 
-func GetShiftableEntries(summary *Summary) Summary {
+func GetShiftableSummaryEntries(summary *Summary) Summary {
 	var shiftableEntries Summary
 	for _, entry := range *summary {
 		if entry.Shiftable {
@@ -128,7 +128,7 @@ func GetShiftableEntries(summary *Summary) Summary {
 	return shiftableEntries
 }
 
-func GetNonShiftableEntries(summary *Summary) Summary {
+func GetNonShiftableSummaryEntries(summary *Summary) Summary {
 	var nonShiftableEntries Summary
 	for _, entry := range *summary {
 		if !entry.Shiftable {

@@ -23,7 +23,7 @@ func GenerateConsumptionsFiles() error {
 		return err
 	}
 
-	shiftableEntries := GetShiftableEntries(&summary)
+	shiftableEntries := GetShiftableSummaryEntries(&summary)
 	var shiftableConsumptions Consumptions
 	for _, entry := range shiftableEntries {
 		entryConsumptions, err := FindConsumptionsByApplianceName(&simulationConsumptions, entry.CommonName)
@@ -37,7 +37,7 @@ func GenerateConsumptionsFiles() error {
 		return err
 	}
 
-	nonShiftableEntries := GetNonShiftableEntries(&summary)
+	nonShiftableEntries := GetNonShiftableSummaryEntries(&summary)
 	var nonShiftableConsumptions Consumptions
 	for _, entry := range nonShiftableEntries {
 		entryConsumptions, err := FindConsumptionsByApplianceName(&simulationConsumptions, entry.CommonName)

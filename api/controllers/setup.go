@@ -381,7 +381,7 @@ func TemperatureSetters(request utils.WebhookRequest) (utils.WebhookResponse, er
 
 		appliances := request.QueryResult.Parameters["appliances"].([]interface{})
 		for _, commonName := range appliances {
-			entry, err := utils.FindEntryByCommonName(&summary, commonName.(string))
+			entry, err := utils.FindSummaryEntryByCommonName(&summary, commonName.(string))
 			if err != nil {
 				return utils.WebhookResponse{
 					FulfillmentMessages: []utils.Message{
