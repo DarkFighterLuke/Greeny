@@ -1,5 +1,10 @@
 package utils
 
+const (
+	ProjectId    = "greeny-ccqg"
+	ContextsBase = "projects/" + ProjectId + "/agent/sessions/%s/contexts/%s"
+)
+
 type Intent struct {
 	DisplayName string `json:"displayName"`
 	Name        string `json:"name"`
