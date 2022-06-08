@@ -137,3 +137,12 @@ func GetNonShiftableSummaryEntries(summary *Summary) Summary {
 	}
 	return nonShiftableEntries
 }
+
+func IsSetupCompleted(summary *Summary) bool {
+	for _, entry := range *summary {
+		if !entry.SetupDone {
+			return false
+		}
+	}
+	return true
+}
