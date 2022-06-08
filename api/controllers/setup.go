@@ -129,14 +129,14 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 					},
 				},
 			},
-			OutputContext: []utils.Context{
+			OutputContexts: []utils.Context{
 				{
 					Name:          request.Session + "/contexts/setup",
-					LifespanCount: 5,
+					LifespanCount: 2,
 				},
 				{
 					Name:          request.Session + "/contexts/ready_request",
-					LifespanCount: 1,
+					LifespanCount: 2,
 				},
 			},
 		}
@@ -175,14 +175,14 @@ func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, erro
 					},
 				},
 			},
-			OutputContext: []utils.Context{
+			OutputContexts: []utils.Context{
 				{
 					Name:          request.Session + "/contexts/setup",
-					LifespanCount: 1,
+					LifespanCount: 2,
 				},
 				{
 					Name:          request.Session + "/contexts/appliance_priority_request",
-					LifespanCount: 1,
+					LifespanCount: 2,
 				},
 			},
 		}
@@ -195,7 +195,7 @@ func AmIReadyForSetup(request utils.WebhookRequest) (utils.WebhookResponse, erro
 					},
 				},
 			},
-			OutputContext: []utils.Context{},
+			OutputContexts: []utils.Context{},
 		}
 	}
 
@@ -214,14 +214,14 @@ func AppliancePriority(request utils.WebhookRequest) (utils.WebhookResponse, err
 					},
 				},
 			},
-			OutputContext: []utils.Context{
+			OutputContexts: []utils.Context{
 				{
 					Name:          request.Session + "/contexts/setup",
-					LifespanCount: 1,
+					LifespanCount: 2,
 				},
 				{
 					Name:          request.Session + "/contexts/appliance_priority_request",
-					LifespanCount: 1,
+					LifespanCount: 2,
 				},
 			},
 		}, nil
@@ -257,14 +257,14 @@ func AppliancePriority(request utils.WebhookRequest) (utils.WebhookResponse, err
 				},
 			},
 		},
-		OutputContext: []utils.Context{
+		OutputContexts: []utils.Context{
 			{
 				Name:          request.Session + "/contexts/setup",
-				LifespanCount: 1,
+				LifespanCount: 2,
 			},
 			{
 				Name:          request.Session + "/contexts/appliance_shiftability_request",
-				LifespanCount: 1,
+				LifespanCount: 2,
 			},
 		},
 	}, nil
@@ -297,14 +297,14 @@ func ApplianceShiftability(request utils.WebhookRequest) (utils.WebhookResponse,
 					},
 				},
 			},
-			OutputContext: []utils.Context{
+			OutputContexts: []utils.Context{
 				{
 					Name:          request.Session + "/contexts/setup",
-					LifespanCount: 1,
+					LifespanCount: 2,
 				},
 				{
 					Name:          request.Session + "/contexts/appliance_shiftability_request",
-					LifespanCount: 1,
+					LifespanCount: 2,
 				},
 			},
 		}, nil
@@ -332,14 +332,14 @@ func ApplianceShiftability(request utils.WebhookRequest) (utils.WebhookResponse,
 					},
 				},
 			},
-			OutputContext: []utils.Context{
+			OutputContexts: []utils.Context{
 				{
 					Name:          request.Session + "/contexts/setup",
-					LifespanCount: 1,
+					LifespanCount: 2,
 				},
 				{
 					Name:          request.Session + "/contexts/temperature_setters_request",
-					LifespanCount: 1,
+					LifespanCount: 2,
 				},
 			},
 		}, nil
@@ -353,14 +353,14 @@ func ApplianceShiftability(request utils.WebhookRequest) (utils.WebhookResponse,
 				},
 			},
 		},
-		OutputContext: []utils.Context{
+		OutputContexts: []utils.Context{
 			{
 				Name:          request.Session + "/contexts/setup",
-				LifespanCount: 1,
+				LifespanCount: 2,
 			},
 			{
 				Name:          request.Session + "/contexts/appliance_priority_request",
-				LifespanCount: 1,
+				LifespanCount: 2,
 			},
 		},
 	}, nil
@@ -391,14 +391,14 @@ func TemperatureSetters(request utils.WebhookRequest) (utils.WebhookResponse, er
 							},
 						},
 					},
-					OutputContext: []utils.Context{
+					OutputContexts: []utils.Context{
 						{
 							Name:          request.Session + "/contexts/setup",
-							LifespanCount: 1,
+							LifespanCount: 2,
 						},
 						{
 							Name:          request.Session + "/contexts/temperature_setters_request",
-							LifespanCount: 1,
+							LifespanCount: 2,
 						},
 					},
 				}, nil
@@ -461,14 +461,14 @@ func RepeatAppliances(request utils.WebhookRequest) (utils.WebhookResponse, erro
 				},
 			},
 		},
-		OutputContext: []utils.Context{
+		OutputContexts: []utils.Context{
 			{
 				Name:          request.Session + "/contexts/setup",
-				LifespanCount: 1,
+				LifespanCount: 2,
 			},
 			{
 				Name:          request.Session + "/contexts/temperature_setters_request",
-				LifespanCount: 1,
+				LifespanCount: 2,
 			},
 		},
 	}, nil

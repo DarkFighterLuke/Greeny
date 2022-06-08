@@ -6,8 +6,9 @@ type Intent struct {
 }
 
 type QueryResult struct {
-	Intent     Intent                 `json:"intent"`
-	Parameters map[string]interface{} `json:"parameters"`
+	Intent         Intent                 `json:"intent"`
+	Parameters     map[string]interface{} `json:"parameters"`
+	OutputContexts []Context              `json:"outputContexts"`
 }
 
 type Text struct {
@@ -19,9 +20,9 @@ type Message struct {
 }
 
 type Context struct {
-	Name          string            `json:"name"`
-	LifespanCount int               `json:"lifespanCount"`
-	Parameters    map[string]string `json:"parameters"`
+	Name          string                 `json:"name"`
+	LifespanCount int                    `json:"lifespanCount"`
+	Parameters    map[string]interface{} `json:"parameters"`
 }
 
 // webhookRequest is used to unmarshal a WebhookRequest JSON object.
@@ -34,5 +35,5 @@ type WebhookRequest struct {
 // webhookResponse is used to marshal a WebhookResponse JSON object.
 type WebhookResponse struct {
 	FulfillmentMessages []Message `json:"fulfillmentMessages"`
-	OutputContext       []Context `json:"outputContexts"`
+	OutputContexts      []Context `json:"outputContexts"`
 }
