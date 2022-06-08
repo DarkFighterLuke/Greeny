@@ -56,5 +56,5 @@ func GetEnergyCostByDayAndHour(energyCost *EnergyCost, dayOfWeek, hour int) (flo
 		return 0, fmt.Errorf("hour out of range")
 	}
 
-	return (*energyCost)[dayOfWeek+1][hour], nil
+	return (*energyCost)[dayOfWeek][hour], nil
 }
