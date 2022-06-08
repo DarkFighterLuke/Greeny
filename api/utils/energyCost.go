@@ -16,7 +16,10 @@ func parseEnergyCost(entries [][]string) (EnergyCost, error) {
 			continue
 		}
 		var dayCostsFloat []float32
-		for _, hourCost := range dayCosts {
+		for j, hourCost := range dayCosts {
+			if j == 0 {
+				continue
+			}
 			cost, err := strconv.ParseFloat(hourCost, 32)
 			if err != nil {
 				return nil, err
