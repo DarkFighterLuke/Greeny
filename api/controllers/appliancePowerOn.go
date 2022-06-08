@@ -125,7 +125,7 @@ func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, erro
 					},
 					OutputContexts: []utils.Context{
 						{
-							Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "appliance_power_on"),
+							Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"),
 							LifespanCount: 1,
 						},
 						{
@@ -158,7 +158,7 @@ func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, erro
 							},
 							OutputContexts: []utils.Context{
 								{
-									Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "appliance_power_on"),
+									Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"),
 									LifespanCount: 1,
 								},
 								{
@@ -188,7 +188,7 @@ func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, erro
 						},
 						OutputContexts: []utils.Context{
 							{
-								Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "appliance_power_on"),
+								Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"),
 								LifespanCount: 1,
 							},
 							{
