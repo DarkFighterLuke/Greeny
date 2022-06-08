@@ -420,7 +420,7 @@ func TemperatureSetters(request utils.WebhookRequest) (utils.WebhookResponse, er
 				{
 					Text: utils.Text{
 						Text: []string{"Afferrato!" +
-							"\nGrazie per tua pazienza Elisabetta e scusami se sono stato chiacchierone." +
+							"\nGrazie per tua pazienza " + userFolderName + " e scusami se sono stato chiacchierone." +
 							"\nTi ricordo che i tuoi dati sono al sicuro con me, non dirò a nessuno del nostro segreto per risparmiare."},
 					},
 				},
