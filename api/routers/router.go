@@ -76,6 +76,9 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "c86594a7-de4a-46fe-a1fb-0d66546de2b1":
 		// Available energy amount
 		response, err = controllers.AvailableEnergyAmount(request)
+	case "187ee8f9-b9eb-4a03-86bc-6344d127490c":
+		// Open windows
+		response, err = controllers.OpenWindows(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}
