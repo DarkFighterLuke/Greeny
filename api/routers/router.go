@@ -55,9 +55,11 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "65597dc5-1d92-4335-b6cf-d28b88d568b5":
 		response, err = controllers.GlobalFallback(request)
 	case "bef393dc-2c73-45e1-a72f-6a9235d2c92e", "7b78b8d8-fef2-43f7-8e12-c0bddf7e57fe":
-		// Appliance power on
 		// Appliance power on - Temperature request
-		response, err = controllers.AppliancePowerOn(request)
+		response, err = controllers.AppliancePowerOn(request, true)
+	case "db697b19-e3cb-422d-82de-ca70a821a92f":
+		// Appliance power on - Windows advice
+		response, err = controllers.AdviceWindows(request)
 	case "132187da-5035-45ea-ab71-6b82e04e03ae":
 		// Appliance power off
 		response, err = controllers.PowerOff(request)
