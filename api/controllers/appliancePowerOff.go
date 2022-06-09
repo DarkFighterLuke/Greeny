@@ -13,6 +13,25 @@ func PowerOff(response utils.WebhookRequest) (utils.WebhookResponse, error) {
 	}
 	appliance := response.QueryResult.Parameters["appliance"].(string)
 
+	basePath := "data/" + user + "/"
+	summary, err := utils.ReadSummaryFile(basePath + "summary.csv")
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+	if !utils.IsSetupCompleted(&summary) {
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Ho rilevato che non hai ancora completato la fase di setup iniziale. " +
+							"Per far girare i miei ingranaggi ho bisogno di quelle importanti informazioni!\n" +
+							"Per favore, avvia la fase di setup dicendo \"setup\"."},
+					},
+				},
+			},
+		}, nil
+	}
+
 	consumptions, err := utils.ReadConsumptions("data/" + user + "/optimal-schedule.csv")
 	if err != nil {
 		return utils.WebhookResponse{}, err
