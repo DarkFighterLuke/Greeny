@@ -154,7 +154,7 @@ func IsApplianceShiftable(user, appliance string) (bool, error) {
 	return false, nil
 }
 
-func MakeApplianceNonShiftable(user, appliance string, hourPowerOff int) error {
+func PowerOffShiftable(user, appliance string, hourPowerOff int) error {
 	// Read shiftables
 	shiftableFile, err := os.Open("data/" + user + "/shiftable.csv")
 	if err != nil {
@@ -169,6 +169,7 @@ func MakeApplianceNonShiftable(user, appliance string, hourPowerOff int) error {
 
 	for i, shiftableEntry := range shiftableEntries {
 		if strings.ToLower(shiftableEntry[0]) == strings.ToLower(appliance) {
+			shiftableEntry[hourPowerOff+1] = "0.00"
 			// Remove the no more shiftable and open a temp shiftable
 			shiftableEntries = append(shiftableEntries[:i], shiftableEntries[i+1:]...)
 			shiftableFileTemp, err := os.Create("data/" + user + "/shiftable_temp.csv")
@@ -206,5 +207,59 @@ func MakeApplianceNonShiftable(user, appliance string, hourPowerOff int) error {
 		}
 	}
 
+	return nil
+}
+
+func PowerOffNonShiftable(user string, appliance string, hourPowerOff int) error {
+	// Read non-shiftables
+	nonShiftableFile, err := os.Open("data/" + user + "/non-shiftable.csv")
+	if err != nil {
+		return err
+	}
+	defer nonShiftableFile.Close()
+
+	nonShiftableEntries, err := csv.NewReader(nonShiftableFile).ReadAll()
+	if err != nil {
+		return err
+	}
+
+	for _, nonShiftableEntry := range nonShiftableEntries {
+		if strings.ToLower(nonShiftableEntry[0]) == strings.ToLower(appliance) {
+			nonShiftableEntry[hourPowerOff+1] = "0.00"
+			// Open a temp shiftable
+			nonShiftableFileTemp, err := os.Create("data/" + user + "/non-shiftable_temp.csv")
+			if err != nil {
+				return err
+			}
+			defer nonShiftableFileTemp.Close()
+			err = csv.NewWriter(nonShiftableFileTemp).WriteAll(nonShiftableEntries)
+			if err != nil {
+				return err
+			}
+
+			// Read shiftable
+			shiftableFile, err := os.Open("data/" + user + "/shiftable.csv")
+			if err != nil {
+				return err
+			}
+
+			shiftableEntries, err := csv.NewReader(shiftableFile).ReadAll()
+			if err != nil {
+				return err
+			}
+
+			// Create a shiftable temp file
+			ShiftableFileTemp, err := os.Create("data/" + user + "/shiftable_temp.csv")
+			if err != nil {
+				return err
+			}
+
+			// Write all the non shiftable + the new one
+			err = csv.NewWriter(ShiftableFileTemp).WriteAll(shiftableEntries)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }

@@ -3,7 +3,6 @@ package controllers
 import (
 	"greeny/utils"
 	"os"
-	"time"
 )
 
 func PowerOff(response utils.WebhookRequest) (utils.WebhookResponse, error) {
@@ -23,7 +22,7 @@ func PowerOff(response utils.WebhookRequest) (utils.WebhookResponse, error) {
 		return utils.WebhookResponse{}, err
 	}
 
-	hour := time.Now().Hour()
+	hour := 21 //time.Now().Hour()
 	on, err := consumption.IsTurnedOn(hour)
 	if err != nil {
 		return utils.WebhookResponse{}, err
@@ -35,23 +34,28 @@ func PowerOff(response utils.WebhookRequest) (utils.WebhookResponse, error) {
 			return utils.WebhookResponse{}, err
 		}
 		if shiftable {
-			err := utils.MakeApplianceNonShiftable(user, appliance, hour)
+			err := utils.PowerOffShiftable(user, appliance, hour)
+			if err != nil {
+				return utils.WebhookResponse{}, err
+			}
+		} else {
+			err := utils.PowerOffNonShiftable(user, appliance, hour)
 			if err != nil {
 				return utils.WebhookResponse{}, err
 			}
 		}
 
-		err = utils.GenerateOptimalSchedule("data/"+user+"shiftable_temp.csv", "data/"+user+
-			"non-shiftable_temp.csv", "data/"+user+"optimal-schedule.csv")
+		err = utils.GenerateOptimalSchedule("data/"+user+"/shiftable_temp.csv", "data/"+user+
+			"/non-shiftable_temp.csv", "data/"+user+"/optimal-schedule.csv")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
 
-		err = os.Remove("data/" + user + "shiftable_temp.csv")
+		err = os.Remove("data/" + user + "/shiftable_temp.csv")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
-		err = os.Remove("data/" + user + "non-shiftable_temp.csv")
+		err = os.Remove("data/" + user + "/non-shiftable_temp.csv")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
