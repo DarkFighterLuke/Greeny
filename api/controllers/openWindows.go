@@ -16,7 +16,7 @@ func OpenWindows(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 				FulfillmentMessages: []utils.Message{
 					{
 						Text: utils.Text{
-							[]string{"Fuori è più freddo, aprendo le finestre stai attuanto una scelta green." +
+							[]string{"Fuori è più freddo, aprendo le finestre stai attuando una scelta green." +
 								" Complimenti!"},
 						},
 					},
@@ -40,7 +40,7 @@ func OpenWindows(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 				FulfillmentMessages: []utils.Message{
 					{
 						Text: utils.Text{
-							[]string{"Fuori è più caldo, aprendo le finestre stai attuanto una scelta green." +
+							[]string{"Fuori è più caldo, aprendo le finestre stai attuando una scelta green." +
 								" Complimenti!"},
 						},
 					},
