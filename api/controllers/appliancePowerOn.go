@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"greeny/utils"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -315,4 +316,83 @@ func calculateAppliancesToPowerOff(summary *utils.Summary, consumptions *utils.C
 	}
 
 	return appliancesToPowerOff, nil
+}
+
+func NREUsageConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+	if request.QueryResult.Parameters["false"] != nil && request.QueryResult.Parameters["false"] == "" {
+		currentHour := time.Now().Hour()
+
+		userFolderName, err := utils.GetUserFolderPath()
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		context, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
+			fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"))
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		applianceName := context.Parameters["appliance"].(string)
+
+		basePath := "data/" + userFolderName + "/"
+
+		nonShiftableConsumptions, err := utils.ReadConsumptions(basePath + "/non-shiftable.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		applianceConsumptions, err := utils.FindConsumptionsByApplianceName(&nonShiftableConsumptions, applianceName)
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		applianceConsumptions.HourlyConsumptions[currentHour] = 0
+		nonShiftableConsumptions = *utils.ReplaceConsumptionsEntry(&nonShiftableConsumptions, applianceConsumptions)
+
+		err = utils.WriteConsumptionsToCsv(&nonShiftableConsumptions, basePath+"/non-shiftable_temp.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		err = utils.GenerateOptimalSchedule(basePath+"/shiftable.csv", basePath+"/non-shiftable_temp.csv",
+			basePath+"/optimal-schedule.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		err = os.Remove(basePath + "/non-shiftable_temp.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Ok " + userFolderName + ", procedo all'accensione."},
+					},
+				},
+			},
+			OutputContexts: []utils.Context{
+				{
+					Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+					LifespanCount: 1,
+				},
+			},
+		}, nil
+	} else {
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Grazie per la tua scelta green, il pianeta te ne è grato.\n" +
+							"Posso fare altro per te?"},
+					},
+				},
+			},
+			OutputContexts: []utils.Context{
+				{
+					Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+					LifespanCount: 1,
+				},
+			},
+		}, nil
+	}
 }
