@@ -54,6 +54,9 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 		response, err = controllers.RepeatAppliances(request)
 	case "65597dc5-1d92-4335-b6cf-d28b88d568b5":
 		response, err = controllers.GlobalFallback(request)
+	case "132187da-5035-45ea-ab71-6b82e04e03ae":
+		// Appliance power off
+		response, err = controllers.PowerOff(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}
