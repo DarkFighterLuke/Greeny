@@ -60,6 +60,9 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "660e8d42-a9d1-4f29-aa78-1b700771b640":
 		// Temperature info
 		response, err = controllers.WhatIsTheTemperature(request)
+	case "d40cc55f-c73d-4b7b-bc6d-62248d4c94c6":
+		// Currently energy production
+		response, err = controllers.CurrentlyEneryProduction(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}
