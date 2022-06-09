@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	ProjectId    = "greeny-ccqg"
-	ContextsBase = "projects/" + ProjectId + "/agent/sessions/%s/contexts/%s"
+	ContextsBase = "%s/contexts/%s"
 )
 
 type Intent struct {
