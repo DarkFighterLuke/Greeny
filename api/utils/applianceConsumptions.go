@@ -208,3 +208,12 @@ func MakeApplianceNonShiftable(user, appliance string, hourPowerOff int) error {
 
 	return nil
 }
+
+func ReplaceConsumptionsEntry(consumptions *Consumptions, consumptionsEntry *ConsumptionEntry) *Consumptions {
+	for i, entry := range *consumptions {
+		if consumptionsEntry.ApplianceName == entry.ApplianceName {
+			(*consumptions)[i] = *consumptionsEntry
+		}
+	}
+	return consumptions
+}
