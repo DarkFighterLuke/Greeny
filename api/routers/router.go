@@ -82,6 +82,9 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "187ee8f9-b9eb-4a03-86bc-6344d127490c":
 		// Open windows
 		response, err = controllers.OpenWindows(request)
+	case "9c5574a3-da98-4c94-88c7-1529cea62b51":
+		// Can I do something else
+		response, err = controllers.CanIDoSomethingElse(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}
