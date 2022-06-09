@@ -3,6 +3,7 @@ package controllers
 import (
 	"greeny/utils"
 	"os"
+	"time"
 )
 
 func PowerOff(response utils.WebhookRequest) (utils.WebhookResponse, error) {
@@ -22,7 +23,7 @@ func PowerOff(response utils.WebhookRequest) (utils.WebhookResponse, error) {
 		return utils.WebhookResponse{}, err
 	}
 
-	hour := 21 //time.Now().Hour()
+	hour := time.Now().Hour()
 	on, err := consumption.IsTurnedOn(hour)
 	if err != nil {
 		return utils.WebhookResponse{}, err
