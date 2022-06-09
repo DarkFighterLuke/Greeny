@@ -25,7 +25,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 	}
 	temperatureParameters := request.QueryResult.Parameters["temperature"]
 	var temperature float32
-	if temperatureParameters != nil {
+	if temperatureParameters != "" {
 		temperatureParameters := temperatureParameters.(map[string]interface{})
 		temperature = float32(temperatureParameters["amount"].(float64))
 	}
