@@ -8,7 +8,7 @@ import (
 
 var pathToPVFile = "data/pv.csv"
 
-func CurrentlyEneryProduction(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+func CurrentlyEnergyProduction(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	pvs, err := utils.ReadPV(pathToPVFile)
 	if err != nil {
 		return utils.WebhookResponse{}, err
