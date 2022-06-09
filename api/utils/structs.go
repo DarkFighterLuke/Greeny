@@ -1,5 +1,7 @@
 package utils
 
+import "fmt"
+
 const (
 	ProjectId    = "greeny-ccqg"
 	ContextsBase = "projects/" + ProjectId + "/agent/sessions/%s/contexts/%s"
@@ -41,4 +43,13 @@ type WebhookRequest struct {
 type WebhookResponse struct {
 	FulfillmentMessages []Message `json:"fulfillmentMessages"`
 	OutputContexts      []Context `json:"outputContexts"`
+}
+
+func FindContextByName(contexts *[]Context, contextName string) (Context, error) {
+	for _, context := range *contexts {
+		if context.Name == contextName {
+			return context, nil
+		}
+	}
+	return Context{}, fmt.Errorf("no context found with the given name")
 }
