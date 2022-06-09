@@ -3,21 +3,19 @@ package controllers
 import (
 	"fmt"
 	"greeny/utils"
+	"time"
 )
 
 func WhatIsTheTemperature(request utils.WebhookRequest) (utils.WebhookResponse, error) {
-	internalTemperature, err := utils.ReadInternalTemperature()
+	temperatures, err := utils.ReadTemperatures()
 	if err != nil {
 		return utils.WebhookResponse{}, err
 	}
 
-	exrternalTemperature, err := utils.ReadExternalTemperature()
-	if err != nil {
-		return utils.WebhookResponse{}, err
-	}
-	strTemperatures := "La temperatura interna è di " + fmt.Sprintf("%.1f", internalTemperature) +
+	hour := time.Now().Hour()
+	strTemperatures := "La temperatura interna è di " + fmt.Sprintf("%.1f", temperatures.InternalTemperatures[hour]) +
 		"°C mentre quella esterna è di " +
-		fmt.Sprintf("%.1f", exrternalTemperature) + "°C"
+		fmt.Sprintf("%.1f", temperatures.ExternalTemperatures[hour]) + "°C"
 
 	if request.QueryResult.Parameters["perceived-temperature-feeling"] != nil {
 		if request.QueryResult.Parameters["perceived-temperature-feeling"].(string) == "freddo" {

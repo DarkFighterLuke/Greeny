@@ -6,41 +6,38 @@ import (
 	"strconv"
 )
 
-func ReadInternalTemperature() (float32, error) {
-	entries, err := readTemperatures()
-	if err != nil {
-		return 0.0, nil
-	}
-
-	internalTemperature, err := strconv.ParseFloat(entries[1][1], 32)
-	if err != nil {
-		return 0.0, err
-	}
-	return float32(internalTemperature), nil
+type Temperatures struct {
+	InternalTemperatures []float32
+	ExternalTemperatures []float32
 }
 
-func ReadExternalTemperature() (float32, error) {
-	entries, err := readTemperatures()
+func ReadTemperatures() (Temperatures, error) {
+	temperaturesFile, err := os.Open("data/simulated_temperatures.csv")
 	if err != nil {
-		return 0.0, err
+		return Temperatures{}, err
 	}
 
-	externalTemperature, err := strconv.ParseFloat(entries[1][0], 32)
+	entries, err := csv.NewReader(temperaturesFile).ReadAll()
 	if err != nil {
-		return 0.0, err
-	}
-	return float32(externalTemperature), nil
-}
-
-func readTemperatures() ([][]string, error) {
-	temperatures, err := os.Open("data/simulated_temperatures.csv")
-	if err != nil {
-		return nil, err
+		return Temperatures{}, err
 	}
 
-	entries, err := csv.NewReader(temperatures).ReadAll()
-	if err != nil {
-		return nil, err
+	var temperatures Temperatures
+	for _, externalTemperature := range entries[1][1:] {
+		tempF, err := strconv.ParseFloat(externalTemperature, 32)
+		if err != nil {
+			return Temperatures{}, err
+		}
+		temperatures.ExternalTemperatures = append(temperatures.ExternalTemperatures, float32(tempF))
 	}
-	return entries, nil
+
+	for _, internalTemperature := range entries[2][1:] {
+		tempF, err := strconv.ParseFloat(internalTemperature, 32)
+		if err != nil {
+			return Temperatures{}, err
+		}
+		temperatures.InternalTemperatures = append(temperatures.InternalTemperatures, float32(tempF))
+	}
+
+	return temperatures, nil
 }
