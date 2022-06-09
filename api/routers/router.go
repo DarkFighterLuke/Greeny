@@ -67,6 +67,9 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "59c9f470-ebb6-48c2-87db-e1bb5fd1f7d5":
 		// Appliance power on - Power off lower priority appliances
 		response, err = controllers.RecommendedPowerOffConfirmation(request)
+	case "39003ad8-90cb-42ff-9241-f4a524bf28be":
+		// Appliance power on - Shiftable power on confirmation
+		response, err = controllers.ProceedToShiftablePowerOn(request)
 	case "660e8d42-a9d1-4f29-aa78-1b700771b640":
 		// Temperature info
 		response, err = controllers.WhatIsTheTemperature(request)

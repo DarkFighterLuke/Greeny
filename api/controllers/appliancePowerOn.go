@@ -171,7 +171,7 @@ func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, erro
 							LifespanCount: 1,
 						},
 						{
-							Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "shiftable_proceed_request_step_1"),
+							Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "shiftable_power_on_confirm_request"),
 							LifespanCount: 1,
 						},
 					},
@@ -502,6 +502,74 @@ func RecommendedPowerOffConfirmation(request utils.WebhookRequest) (utils.Webhoo
 				},
 			},
 			OutputContexts: outputContexts,
+		}, nil
+	}
+}
+
+func ProceedToShiftablePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+	if request.QueryResult.Parameters["false"] != nil && request.QueryResult.Parameters["false"] == "" {
+		powerOnContext, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
+			fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"))
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		currentHour := time.Now().Hour()
+
+		userFolderName, err := utils.GetUserFolderPath()
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		applianceName := powerOnContext.Parameters["appliance"].(string)
+
+		err = utils.PowerOnShiftable(userFolderName, applianceName, currentHour)
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		basePath := "data/" + userFolderName + "/"
+		err = utils.GenerateOptimalSchedule(basePath+"shiftable_temp.csv", basePath+"non-shiftable.csv", basePath+"optimal-schedule.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		err = os.Remove(basePath + "/shiftable_temp.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{fmt.Sprintf("Ok %s, procedo.\nPosso fare altro per te?", userFolderName)},
+					},
+				},
+			},
+			OutputContexts: []utils.Context{
+				{
+					Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+					LifespanCount: 1,
+				},
+			},
+		}, nil
+	} else {
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Grazie per la tua scelta green, il pianeta te ne è grato.\n" +
+							"Posso fare altro per te?"},
+					},
+				},
+			},
+			OutputContexts: []utils.Context{
+				{
+					Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+					LifespanCount: 1,
+				},
+			},
 		}, nil
 	}
 }
