@@ -133,3 +133,78 @@ func (ce *ConsumptionEntry) GetPowerOnInterval() (startHour, endHour int, err er
 
 	return
 }
+
+func IsApplianceShiftable(user, appliance string) (bool, error) {
+	file, err := os.Open("data/" + user + "/shiftable.csv")
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+
+	entries, err := csv.NewReader(file).ReadAll()
+	if err != nil {
+		return false, err
+	}
+
+	for _, entry := range entries {
+		if strings.ToLower(entry[0]) == strings.ToLower(appliance) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func MakeApplianceNonShiftable(user, appliance string, hourPowerOff int) error {
+	// Read shiftables
+	shiftableFile, err := os.Open("data/" + user + "/shiftable.csv")
+	if err != nil {
+		return err
+	}
+	defer shiftableFile.Close()
+
+	shiftableEntries, err := csv.NewReader(shiftableFile).ReadAll()
+	if err != nil {
+		return err
+	}
+
+	for i, shiftableEntry := range shiftableEntries {
+		if strings.ToLower(shiftableEntry[0]) == strings.ToLower(appliance) {
+			// Remove the no more shiftable and open a temp shiftable
+			shiftableEntries = append(shiftableEntries[:i], shiftableEntries[i+1:]...)
+			shiftableFileTemp, err := os.Create("data/" + user + "/shiftable_temp.csv")
+			if err != nil {
+				return err
+			}
+			defer shiftableFileTemp.Close()
+			err = csv.NewWriter(shiftableFileTemp).WriteAll(shiftableEntries)
+			if err != nil {
+				return err
+			}
+
+			// Read non shiftable
+			nonShiftableFile, err := os.Open("data/" + user + "/non-shiftable.csv")
+			if err != nil {
+				return err
+			}
+
+			nonShiftableEntries, err := csv.NewReader(nonShiftableFile).ReadAll()
+			if err != nil {
+				return err
+			}
+
+			// Create a nonShiftable temp file
+			nonShiftableFileTemp, err := os.Create("data/" + user + "/non-shiftable_temp.csv")
+			if err != nil {
+				return err
+			}
+
+			// Write all the non shiftable + the new one
+			err = csv.NewWriter(nonShiftableFileTemp).WriteAll(append(nonShiftableEntries, shiftableEntry))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
