@@ -327,6 +327,72 @@ func PowerOnNonShiftable(user string, appliance string, hourPowerOff int) error 
 	return nil
 }
 
+func PowerOnShiftable(user, appliance string, hourPowerOff int) error {
+	// Read shiftables
+	shiftableFile, err := os.Open("data/" + user + "/shiftable.csv")
+	if err != nil {
+		return err
+	}
+	defer shiftableFile.Close()
+
+	shiftableEntries, err := csv.NewReader(shiftableFile).ReadAll()
+	if err != nil {
+		return err
+	}
+
+	consumptions, err := parseConsumptions(shiftableEntries)
+	if err != nil {
+		return err
+	}
+
+	for i, shiftableEntry := range shiftableEntries {
+		if strings.ToLower(shiftableEntry[0]) == strings.ToLower(appliance) {
+			hourlyConsumptionIndex, _, err := consumptions[i-1].GetPowerOnInterval()
+			if err != nil {
+				return err
+			}
+
+			shiftableEntry[hourPowerOff+1] = shiftableEntry[hourlyConsumptionIndex+1]
+			// Remove the no more shiftable and open a temp shiftable
+			shiftableEntries = append(shiftableEntries[:i], shiftableEntries[i+1:]...)
+			shiftableFileTemp, err := os.Create("data/" + user + "/shiftable_temp.csv")
+			if err != nil {
+				return err
+			}
+			defer shiftableFileTemp.Close()
+			err = csv.NewWriter(shiftableFileTemp).WriteAll(shiftableEntries)
+			if err != nil {
+				return err
+			}
+
+			// Read non shiftable
+			nonShiftableFile, err := os.Open("data/" + user + "/non-shiftable.csv")
+			if err != nil {
+				return err
+			}
+
+			nonShiftableEntries, err := csv.NewReader(nonShiftableFile).ReadAll()
+			if err != nil {
+				return err
+			}
+
+			// Create a nonShiftable temp file
+			nonShiftableFileTemp, err := os.Create("data/" + user + "/non-shiftable_temp.csv")
+			if err != nil {
+				return err
+			}
+
+			// Write all the non shiftable + the new one
+			err = csv.NewWriter(nonShiftableFileTemp).WriteAll(append(nonShiftableEntries, shiftableEntry))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func ReplaceConsumptionsEntry(consumptions *Consumptions, consumptionsEntry *ConsumptionEntry) *Consumptions {
 	for i, entry := range *consumptions {
 		if consumptionsEntry.ApplianceName == entry.ApplianceName {
