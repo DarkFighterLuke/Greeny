@@ -11,7 +11,18 @@ import (
 func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	currentHour := time.Now().Hour()
 	currentDayOfWeek := int(time.Now().Weekday())
-	applianceName := request.QueryResult.Parameters["appliance"].(string)
+	var applianceName string
+	if request.QueryResult.Parameters["appliance"] == nil {
+		context, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
+			fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"))
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		applianceName = context.Parameters["appliance"].(string)
+	} else {
+		applianceName = request.QueryResult.Parameters["appliance"].(string)
+	}
+	temperature := request.QueryResult.Parameters["temperature"]
 
 	userFolderName, err := utils.GetUserFolderPath()
 	if err != nil {
@@ -43,6 +54,36 @@ func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, erro
 		return utils.WebhookResponse{}, err
 	}
 
+	if summaryAppliance.NeedsTemperatureToPowerOn && temperature == "" {
+		outputContexts := request.QueryResult.OutputContexts
+		outputContexts = append(outputContexts, utils.Context{
+			Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "temperature_request"),
+			LifespanCount: 1,
+		})
+
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{fmt.Sprintf("A che temperatura vuoi che accenda l'elettrodomestico %s?", applianceName)},
+					},
+				},
+			},
+			OutputContexts: outputContexts,
+		}, nil
+	} else if !summaryAppliance.NeedsTemperatureToPowerOn && temperature != "" {
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{fmt.Sprintf("Mi dispiace %s, ma questo elettrodomestico non prevede l'impostazione di una "+
+							"temperatura...", userFolderName)},
+					},
+				},
+			},
+		}, nil
+	}
+
 	if summaryAppliance.TemperatureSetter {
 		// TODO: Implement appliance temperature setter case
 		return utils.WebhookResponse{}, fmt.Errorf("non implemented yet")
@@ -51,7 +92,7 @@ func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, erro
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
-		applianceConsumptions, err := utils.FindConsumptionsByApplianceName(&consumptions, applianceName)
+		applianceConsumptions, _ := utils.FindConsumptionsByApplianceName(&consumptions, applianceName)
 		if err != nil {
 			return utils.WebhookResponse{}, nil
 		}
@@ -142,7 +183,7 @@ func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, erro
 						"quantità di energia rinnovabile a tua disposizione, dovendo così prelevarla dalla rete "+
 						"elettrica, per un costo di %.2f€.\n", userFolderName, applianceName, nreCost)
 
-					appliancesToPowerOff, err := calculateAppliancesToPowerOff(&summary, &consumptions, currentHour, summaryAppliance.Priority, nreAmount)
+					appliancesToPowerOff, err := calculateAppliancesToPowerOff(&summary, &consumptions, currentHour, summaryAppliance, nreAmount)
 					if err != nil {
 						return utils.WebhookResponse{}, err
 					}
@@ -169,14 +210,11 @@ func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, erro
 						}, nil
 					}
 					var appliancesMessage string
-					for i, applianceConsumption := range appliancesToPowerOff {
-						if i != 0 {
-							appliancesMessage += ", "
-						}
-						appliancesMessage += applianceConsumption.ApplianceName
+					for _, applianceConsumption := range appliancesToPowerOff {
+						appliancesMessage += applianceConsumption.ApplianceName + ", "
 					}
 					responseMessage += fmt.Sprintf("Tuttavia, se spegnessi %s non dovresti "+
-						"acquistare energia dalla rete elettrica.\nVuoi che spenga?", appliancesMessage)
+						"acquistare energia dalla rete elettrica.\nVuoi che li spenga?", appliancesMessage)
 
 					return utils.WebhookResponse{
 						FulfillmentMessages: []utils.Message{
@@ -235,8 +273,8 @@ func calculateCurrentTotalConsumption(currentHour int, consumptions *utils.Consu
 	return currentTotalConsumption, nil
 }
 
-func calculateAppliancesToPowerOff(summary *utils.Summary, consumptions *utils.Consumptions, currentHour int, priority int, energyToSave float32) (utils.Consumptions, error) {
-	if priority < 1 || priority > 10 {
+func calculateAppliancesToPowerOff(summary *utils.Summary, consumptions *utils.Consumptions, currentHour int, applianceToPowerOn *utils.SummaryEntry, energyToSave float32) (utils.Consumptions, error) {
+	if applianceToPowerOn.Priority < 1 || applianceToPowerOn.Priority > 10 {
 		return nil, fmt.Errorf("priority out of range")
 	}
 
@@ -250,7 +288,7 @@ func calculateAppliancesToPowerOff(summary *utils.Summary, consumptions *utils.C
 
 	var lowerEqualPriorityConsumptions []*utils.ConsumptionEntry
 	for _, entry := range *summary {
-		if entry.Priority <= priority {
+		if entry.Priority <= applianceToPowerOn.Priority && entry.CommonName != applianceToPowerOn.CommonName {
 			consumptionEntry, err := utils.FindConsumptionsByApplianceName(consumptions, entry.CommonName)
 			if err != nil {
 				continue
