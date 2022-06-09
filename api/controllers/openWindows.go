@@ -17,7 +17,7 @@ func OpenWindows(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 					{
 						Text: utils.Text{
 							[]string{"Fuori è più freddo, aprendo le finestre stai attuanto una scelta green." +
-								"Complimenti!"},
+								" Complimenti!"},
 						},
 					},
 				},
@@ -28,7 +28,7 @@ func OpenWindows(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 					{
 						Text: utils.Text{
 							[]string{"Ti consiglio di non aprire perchè fuori la temperatura è più alta" +
-								"e la casa potrebbe riscaldarsi!"},
+								" e la casa potrebbe riscaldarsi!"},
 						},
 					},
 				},
@@ -41,7 +41,7 @@ func OpenWindows(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 					{
 						Text: utils.Text{
 							[]string{"Fuori è più caldo, aprendo le finestre stai attuanto una scelta green." +
-								"Complimenti!"},
+								" Complimenti!"},
 						},
 					},
 				},
@@ -52,7 +52,7 @@ func OpenWindows(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 					{
 						Text: utils.Text{
 							[]string{"Ti consiglio di non aprire perchè fuori la temperatura è più bassa" +
-								"e la casa potrebbe raffreddarsi!"},
+								" e la casa potrebbe raffreddarsi!"},
 						},
 					},
 				},
