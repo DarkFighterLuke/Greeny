@@ -264,6 +264,69 @@ func PowerOffNonShiftable(user string, appliance string, hourPowerOff int) error
 	return nil
 }
 
+func PowerOnNonShiftable(user string, appliance string, hourPowerOff int) error {
+	// Read non-shiftables
+	nonShiftableFile, err := os.Open("data/" + user + "/non-shiftable.csv")
+	if err != nil {
+		return err
+	}
+	defer nonShiftableFile.Close()
+
+	nonShiftableEntries, err := csv.NewReader(nonShiftableFile).ReadAll()
+	if err != nil {
+		return err
+	}
+
+	consumptions, err := parseConsumptions(nonShiftableEntries)
+	if err != nil {
+		return err
+	}
+
+	for i, nonShiftableEntry := range nonShiftableEntries {
+		if strings.ToLower(nonShiftableEntry[0]) == strings.ToLower(appliance) {
+			hourlyConsumptionIndex, _, err := consumptions[i-1].GetPowerOnInterval()
+			if err != nil {
+				return err
+			}
+			nonShiftableEntry[hourPowerOff+1] = nonShiftableEntry[hourlyConsumptionIndex+1]
+			// Open a temp shiftable
+			nonShiftableFileTemp, err := os.Create("data/" + user + "/non-shiftable_temp.csv")
+			if err != nil {
+				return err
+			}
+			defer nonShiftableFileTemp.Close()
+			err = csv.NewWriter(nonShiftableFileTemp).WriteAll(nonShiftableEntries)
+			if err != nil {
+				return err
+			}
+
+			// Read shiftable
+			shiftableFile, err := os.Open("data/" + user + "/shiftable.csv")
+			if err != nil {
+				return err
+			}
+
+			shiftableEntries, err := csv.NewReader(shiftableFile).ReadAll()
+			if err != nil {
+				return err
+			}
+
+			// Create a shiftable temp file
+			ShiftableFileTemp, err := os.Create("data/" + user + "/shiftable_temp.csv")
+			if err != nil {
+				return err
+			}
+
+			// Write all the non shiftable + the new one
+			err = csv.NewWriter(ShiftableFileTemp).WriteAll(shiftableEntries)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func ReplaceConsumptionsEntry(consumptions *Consumptions, consumptionsEntry *ConsumptionEntry) *Consumptions {
 	for i, entry := range *consumptions {
 		if consumptionsEntry.ApplianceName == entry.ApplianceName {
