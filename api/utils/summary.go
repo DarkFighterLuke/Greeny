@@ -11,12 +11,13 @@ import (
 type Summary = []SummaryEntry
 
 type SummaryEntry struct {
-	Appliance         string
-	Shiftable         bool
-	Priority          int
-	SetupDone         bool
-	TemperatureSetter bool
-	CommonName        string
+	Appliance                 string
+	Shiftable                 bool
+	Priority                  int
+	SetupDone                 bool
+	TemperatureSetter         bool
+	CommonName                string
+	NeedsTemperatureToPowerOn bool
 }
 
 func parseSummary(entries [][]string) (Summary, error) {
@@ -41,13 +42,18 @@ func parseSummary(entries [][]string) (Summary, error) {
 		if err != nil {
 			return nil, err
 		}
+		needsTemperatureToPowerOn, err := strconv.ParseBool(entry[6])
+		if err != nil {
+			return nil, err
+		}
 		summaryEntry := SummaryEntry{
-			Appliance:         entry[0],
-			Shiftable:         shiftable,
-			Priority:          int(priority),
-			SetupDone:         setupDone,
-			TemperatureSetter: temperatureSetter,
-			CommonName:        entry[5],
+			Appliance:                 entry[0],
+			Shiftable:                 shiftable,
+			Priority:                  int(priority),
+			SetupDone:                 setupDone,
+			TemperatureSetter:         temperatureSetter,
+			CommonName:                entry[5],
+			NeedsTemperatureToPowerOn: needsTemperatureToPowerOn,
 		}
 		summary = append(summary, summaryEntry)
 	}
@@ -97,13 +103,14 @@ func WriteToCsv(summary *Summary, path string) error {
 func summaryTo2DArray(summary *Summary) [][]string {
 	var array [][]string
 	for _, entry := range *summary {
-		arrayEntry := make([]string, 6)
+		arrayEntry := make([]string, 7)
 		arrayEntry[0] = entry.Appliance
 		arrayEntry[1] = strconv.FormatBool(entry.Shiftable)
 		arrayEntry[2] = strconv.Itoa(entry.Priority)
 		arrayEntry[3] = strconv.FormatBool(entry.SetupDone)
 		arrayEntry[4] = strconv.FormatBool(entry.TemperatureSetter)
 		arrayEntry[5] = entry.CommonName
+		arrayEntry[6] = strconv.FormatBool(entry.NeedsTemperatureToPowerOn)
 		array = append(array, arrayEntry)
 	}
 	return array

@@ -69,7 +69,7 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 				Shiftable:  false,
 				Priority:   1,
 				SetupDone:  false,
-				CommonName: "Televisore",
+				CommonName: "Televisione",
 			},
 			{
 				Appliance:  "scaldabagno",
