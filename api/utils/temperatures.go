@@ -41,3 +41,16 @@ func ReadTemperatures() (Temperatures, error) {
 
 	return temperatures, nil
 }
+
+func IsColderOutside(hour int) (bool, error) {
+	temperatures, err := ReadTemperatures()
+	if err != nil {
+		return false, err
+	}
+
+	if temperatures.ExternalTemperatures[hour] < temperatures.InternalTemperatures[hour] {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
