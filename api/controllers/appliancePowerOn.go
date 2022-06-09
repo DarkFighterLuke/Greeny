@@ -124,7 +124,6 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 	}
 
 	if summaryAppliance.TemperatureSetter && doTemperatureCheck {
-		// TODO: Implement appliance temperature setter case
 		isDangerous, isWantedTooLow, err := utils.IsDeltaTemperatureDangerous(temperature, currentHour)
 		if err != nil {
 			return utils.WebhookResponse{}, err
