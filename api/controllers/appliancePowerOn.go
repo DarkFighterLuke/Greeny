@@ -233,6 +233,9 @@ func AppliancePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, erro
 							{
 								Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "power_off_appliances_request"),
 								LifespanCount: 1,
+								Parameters: map[string]interface{}{
+									"appliances": appliancesToPowerOff,
+								},
 							},
 						},
 					}, nil
@@ -343,7 +346,11 @@ func NREUsageConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, 
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
-		applianceConsumptions.HourlyConsumptions[currentHour] = 0
+		hourlyConsumptionIndex, _, err := applianceConsumptions.GetPowerOnInterval()
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		applianceConsumptions.HourlyConsumptions[currentHour] = applianceConsumptions.HourlyConsumptions[hourlyConsumptionIndex]
 		nonShiftableConsumptions = *utils.ReplaceConsumptionsEntry(&nonShiftableConsumptions, applianceConsumptions)
 
 		err = utils.WriteConsumptionsToCsv(&nonShiftableConsumptions, basePath+"/non-shiftable_temp.csv")
@@ -393,6 +400,108 @@ func NREUsageConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, 
 					LifespanCount: 1,
 				},
 			},
+		}, nil
+	}
+}
+
+func RecommendedPowerOffConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+	powerOnContext, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
+		fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"))
+	if err != nil {
+		return utils.WebhookResponse{}, err
+	}
+
+	if request.QueryResult.Parameters["false"] != nil && request.QueryResult.Parameters["false"] == "" {
+		currentHour := time.Now().Hour()
+
+		userFolderName, err := utils.GetUserFolderPath()
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		applianceName := powerOnContext.Parameters["appliance"].(string)
+
+		pwOffContext, err := utils.FindContextByName(&request.QueryResult.OutputContexts, fmt.Sprintf(utils.ContextsBase, request.Session,
+			"power_off_appliances_request"))
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		appliancesToPowerOff := pwOffContext.Parameters["appliances"].([]interface{})
+
+		basePath := "data/" + userFolderName + "/"
+
+		summary, err := utils.ReadSummaryFile(basePath + "summary.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		for _, appliance := range appliancesToPowerOff {
+			summaryEntry, err := utils.FindSummaryEntryByCommonName(&summary, appliance.(string))
+			if err != nil {
+				return utils.WebhookResponse{}, err
+			}
+			if summaryEntry.Shiftable {
+				err = utils.PowerOffShiftable(userFolderName, appliance.(string), currentHour)
+				if err != nil {
+					return utils.WebhookResponse{}, err
+				}
+			} else {
+				err = utils.PowerOffNonShiftable(userFolderName, appliance.(string), currentHour)
+				if err != nil {
+					return utils.WebhookResponse{}, err
+				}
+			}
+		}
+		err = utils.PowerOnNonShiftable(userFolderName, applianceName, currentHour)
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		err = utils.GenerateOptimalSchedule(basePath+"shiftable_temp.csv", basePath+"non-shiftable_temp.csv", basePath+"optimal-schedule.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		err = os.Remove(basePath + "/shiftable_temp.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		err = os.Remove(basePath + "/non-shiftable_temp.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Grazie per la tua scelta green, il pianeta te ne è grato.\n" +
+							"Posso fare altro per te?"},
+					},
+				},
+			},
+			OutputContexts: []utils.Context{
+				{
+					Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+					LifespanCount: 1,
+				},
+			},
+		}, nil
+	} else {
+		var outputContexts []utils.Context
+		outputContexts = append(outputContexts, powerOnContext)
+		outputContexts = append(outputContexts, utils.Context{
+			Name:          "nre_turn_on_request",
+			LifespanCount: 1,
+		})
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Vuoi procedere comunque con l'accensione?"},
+					},
+				},
+			},
+			OutputContexts: outputContexts,
 		}, nil
 	}
 }
