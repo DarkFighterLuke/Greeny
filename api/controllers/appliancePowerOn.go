@@ -544,6 +544,7 @@ func NREUsageConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, 
 func RecommendedPowerOffConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	powerOnContext, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
 		request.Session, "power_on_request")
+	powerOnContext.LifespanCount = 1
 	if err != nil {
 		return utils.WebhookResponse{}, err
 	}
@@ -627,7 +628,7 @@ func RecommendedPowerOffConfirmation(request utils.WebhookRequest) (utils.Webhoo
 		var outputContexts []utils.Context
 		outputContexts = append(outputContexts, powerOnContext)
 		outputContexts = append(outputContexts, utils.Context{
-			Name:          "nre_turn_on_request",
+			Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "nre_turn_on_request"),
 			LifespanCount: 1,
 		})
 		return utils.WebhookResponse{
