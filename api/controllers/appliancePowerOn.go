@@ -15,7 +15,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 	var applianceName string
 	if request.QueryResult.Parameters["appliance"] == nil {
 		context, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
-			fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"))
+			request.Session, "power_on_request")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
@@ -161,7 +161,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 		nreAmount := currentTotalConsumption + applianceConsumptions.HourlyConsumptions[startHour] - reAmount
 		nreCost := nreAmount * currentEnergyCost
 
-		powerOnContext, _ := utils.FindContextByName(&request.QueryResult.OutputContexts, "power_on_request")
+		powerOnContext, _ := utils.FindContextByName(&request.QueryResult.OutputContexts, request.Session, "power_on_request")
 
 		if isTemperatureLowerThanInside {
 			if isColderOutside {
@@ -419,7 +419,7 @@ func NREUsageConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, 
 			return utils.WebhookResponse{}, err
 		}
 		context, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
-			fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"))
+			request.Session, "power_on_request")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
@@ -495,7 +495,7 @@ func NREUsageConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, 
 
 func RecommendedPowerOffConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	powerOnContext, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
-		fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"))
+		request.Session, "power_on_request")
 	if err != nil {
 		return utils.WebhookResponse{}, err
 	}
@@ -510,8 +510,8 @@ func RecommendedPowerOffConfirmation(request utils.WebhookRequest) (utils.Webhoo
 
 		applianceName := powerOnContext.Parameters["appliance"].(string)
 
-		pwOffContext, err := utils.FindContextByName(&request.QueryResult.OutputContexts, fmt.Sprintf(utils.ContextsBase, request.Session,
-			"power_off_appliances_request"))
+		pwOffContext, err := utils.FindContextByName(&request.QueryResult.OutputContexts, request.Session,
+			"power_off_appliances_request")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
@@ -598,7 +598,7 @@ func RecommendedPowerOffConfirmation(request utils.WebhookRequest) (utils.Webhoo
 func ProceedToShiftablePowerOn(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	if request.QueryResult.Parameters["false"] != nil && request.QueryResult.Parameters["false"] == "" {
 		powerOnContext, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
-			fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"))
+			request.Session, "power_on_request")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
