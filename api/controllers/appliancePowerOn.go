@@ -23,11 +23,24 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 	} else {
 		applianceName = request.QueryResult.Parameters["appliance"].(string)
 	}
-	temperatureParameters := request.QueryResult.Parameters["temperature"]
+
+	var temperatureParameters map[string]interface{}
 	var temperature float32
-	if temperatureParameters != "" {
-		temperatureParameters := temperatureParameters.(map[string]interface{})
-		temperature = float32(temperatureParameters["amount"].(float64))
+	if request.QueryResult.Parameters["temperature"] == nil {
+		context, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
+			request.Session, "power_on_request")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+		temperatureParameters = context.Parameters["temperature"].(map[string]interface{})
+	} else {
+		switch request.QueryResult.Parameters["temperature"].(type) {
+		case string:
+			temperatureParameters = nil
+		default:
+			temperatureParameters = request.QueryResult.Parameters["temperature"].(map[string]interface{})
+			temperature = float32(temperatureParameters["amount"].(float64))
+		}
 	}
 
 	userFolderName, err := utils.GetUserFolderPath()
@@ -60,7 +73,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 		return utils.WebhookResponse{}, err
 	}
 
-	if summaryAppliance.NeedsTemperatureToPowerOn && temperatureParameters == "" {
+	if summaryAppliance.NeedsTemperatureToPowerOn && temperatureParameters == nil {
 		outputContexts := request.QueryResult.OutputContexts
 		outputContexts = append(outputContexts, utils.Context{
 			Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "temperature_request"),
@@ -77,7 +90,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 			},
 			OutputContexts: outputContexts,
 		}, nil
-	} else if !summaryAppliance.NeedsTemperatureToPowerOn && temperatureParameters != "" {
+	} else if !summaryAppliance.NeedsTemperatureToPowerOn && temperatureParameters != nil {
 		return utils.WebhookResponse{
 			FulfillmentMessages: []utils.Message{
 				{
@@ -123,6 +136,9 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 		return utils.WebhookResponse{}, err
 	}
 
+	powerOnContext, _ := utils.FindContextByName(&request.QueryResult.OutputContexts, request.Session, "power_on_request")
+	powerOnContext.LifespanCount = 1
+
 	if summaryAppliance.TemperatureSetter && doTemperatureCheck {
 		isDangerous, isWantedTooLow, err := utils.IsDeltaTemperatureDangerous(temperature, currentHour)
 		if err != nil {
@@ -161,7 +177,10 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 		nreAmount := currentTotalConsumption + applianceConsumptions.HourlyConsumptions[startHour] - reAmount
 		nreCost := nreAmount * currentEnergyCost
 
-		powerOnContext, _ := utils.FindContextByName(&request.QueryResult.OutputContexts, request.Session, "power_on_request")
+		var savingMessage string
+		if nreAmount > 0 {
+			savingMessage = fmt.Sprintf("In questa maniera risparmieresti %.2f€ e l'immissione di CO2 nell'ambiente.", nreCost)
+		}
 
 		if isTemperatureLowerThanInside {
 			if isColderOutside {
@@ -171,9 +190,8 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 							Text: utils.Text{
 								Text: []string{fmt.Sprintf("%s \nLa temperatura interna attualmente è di %.1f°C, "+
 									"quella esterna di %1.f. Se vuoi un po’ di fresco il mio consiglio è di aprire le "+
-									"finestre invece di accendere l'elettrodomestico %s. In questa maniera risparmieresti "+
-									"%.2f€ e l'immissione di CO2 nell'ambiente.\nChe ne dici?", healthAlertMessage,
-									internalTemperature, externalTemperature, applianceName, nreCost)},
+									"finestre invece di accendere l'elettrodomestico %s. %s\nChe ne dici?", healthAlertMessage,
+									internalTemperature, externalTemperature, applianceName, savingMessage)},
 							},
 						},
 					},
@@ -235,11 +253,16 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 			}
 			scheduledApplianceCost := scheduledEnergyCost * applianceConsumptions.HourlyConsumptions[startHour]
 			savingPercentage := (currentApplianceCost - scheduledApplianceCost) * 100 / currentApplianceCost
-			responseMessage := fmt.Sprintf("%s ho fatto due calcoli per te. "+
-				"Se accendessi l'elettrodomestico %s adesso spenderesti %.2f€, mentre, se lo accendessi"+
-				"dalle ore %d alle ore %d, spenderesti soltanto %.2f€, un risparmio del %.2f%%.\n",
-				strings.ToTitle(strings.ToLower(userFolderName)),
-				applianceName, currentApplianceCost, startHour, endHour, scheduledApplianceCost, savingPercentage)
+			var responseMessage string
+			if currentApplianceCost == scheduledApplianceCost {
+				responseMessage += fmt.Sprintf("Se accendessi l'elettrodomestico %s adesso la pianficazione di tutti gli altri elettrodomestici "+
+					"potrebbe cambiare.\n", applianceName)
+			} else {
+				responseMessage += fmt.Sprintf("%s ho fatto due calcoli per te. "+
+					"Se accendessi l'elettrodomestico %s adesso spenderesti %.2f€, mentre, se lo accendessi "+
+					"dalle ore %d alle ore %d, spenderesti soltanto %.2f€, un risparmio del %.2f%%.\n",
+					userFolderName, applianceName, currentApplianceCost, startHour, endHour, scheduledApplianceCost, savingPercentage)
+			}
 
 			if currentTotalConsumption+applianceConsumptions.HourlyConsumptions[startHour] > reAmount {
 				responseMessage += "Inoltre sforeresti la produzione attuale di energia rinnovabile della casa, " +
@@ -256,10 +279,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 					},
 				},
 				OutputContexts: []utils.Context{
-					{
-						Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"),
-						LifespanCount: 1,
-					},
+					powerOnContext,
 					{
 						Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "shiftable_power_on_confirm_request"),
 						LifespanCount: 1,
@@ -278,8 +298,9 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 				if err != nil {
 					return utils.WebhookResponse{}, err
 				}
-				if len(appliancesToPowerOff) == 0 {
-					responseMessage += "Vuoi procedere lo stesso?"
+				if appliancesToPowerOff == nil || len(appliancesToPowerOff) == 0 {
+					responseMessage += "Sfortunatamente non sono riuscito a trovare un modo possibile per risparmiare. " +
+						"Vuoi procedere lo stesso?"
 					return utils.WebhookResponse{
 						FulfillmentMessages: []utils.Message{
 							{
@@ -289,10 +310,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 							},
 						},
 						OutputContexts: []utils.Context{
-							{
-								Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "power_on_request"),
-								LifespanCount: 1,
-							},
+							powerOnContext,
 							{
 								Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "nre_turn_on_request"),
 								LifespanCount: 1,
@@ -329,10 +347,34 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 						},
 					},
 				}, nil
+			} else {
+				err = utils.PowerOnNonShiftable(userFolderName, applianceName, currentHour)
+				if err != nil {
+					return utils.WebhookResponse{}, err
+				}
+
+				err = utils.GenerateOptimalSchedule(basePath+"shiftable.csv", basePath+"non-shiftable_temp.csv", basePath+"optimal-schedule.csv")
+				if err != nil {
+					return utils.WebhookResponse{}, err
+				}
+
+				err = os.Remove(basePath + "/non-shiftable_temp.csv")
+				if err != nil {
+					return utils.WebhookResponse{}, err
+				}
+
+				return utils.WebhookResponse{
+					FulfillmentMessages: []utils.Message{
+						{
+							Text: utils.Text{
+								Text: []string{"Sfortunatamente non sono riuscito a trovare un modo possibile per risparmiare. Procedo all'accensione.\nPosso fare altro per te?"},
+							},
+						},
+					},
+				}, nil
 			}
 		}
 	}
-	return utils.WebhookResponse{}, fmt.Errorf("")
 }
 
 func calculateCurrentRenewableEnergyAmount(currentHour int, userFolderName string) (float32, error) {
@@ -402,9 +444,15 @@ func calculateAppliancesToPowerOff(summary *utils.Summary, consumptions *utils.C
 	var appliancesToPowerOff utils.Consumptions
 	i := 0
 	for sum < energyToSave && i < len(lowerEqualPriorityConsumptions) {
-		sum += lowerEqualPriorityConsumptions[i].HourlyConsumptions[currentHour]
-		appliancesToPowerOff = append(appliancesToPowerOff, *lowerEqualPriorityConsumptions[i])
+		if lowerEqualPriorityConsumptions[i].HourlyConsumptions[currentHour] > 0 {
+			sum += lowerEqualPriorityConsumptions[i].HourlyConsumptions[currentHour]
+			appliancesToPowerOff = append(appliancesToPowerOff, *lowerEqualPriorityConsumptions[i])
+		}
 		i++
+	}
+
+	if sum < energyToSave {
+		return nil, nil
 	}
 
 	return appliancesToPowerOff, nil
@@ -618,12 +666,17 @@ func ProceedToShiftablePowerOn(request utils.WebhookRequest) (utils.WebhookRespo
 		}
 
 		basePath := "data/" + userFolderName + "/"
-		err = utils.GenerateOptimalSchedule(basePath+"shiftable_temp.csv", basePath+"non-shiftable.csv", basePath+"optimal-schedule.csv")
+		err = utils.GenerateOptimalSchedule(basePath+"shiftable_temp.csv", basePath+"non-shiftable_temp.csv", basePath+"optimal-schedule.csv")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
 
 		err = os.Remove(basePath + "/shiftable_temp.csv")
+		if err != nil {
+			return utils.WebhookResponse{}, err
+		}
+
+		err = os.Remove(basePath + "/non-shiftable_temp.csv")
 		if err != nil {
 			return utils.WebhookResponse{}, err
 		}
