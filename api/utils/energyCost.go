@@ -11,12 +11,24 @@ type EnergyCost = [][]float32
 
 func parseEnergyCost(entries [][]string) (EnergyCost, error) {
 	var energyCost EnergyCost
-	for i, dayCosts := range entries {
-		if i == 0 {
+
+	// Sunday energy cost parsing
+	var dayCostsFloat []float32
+	for j, hourCost := range entries[7] {
+		if j == 0 {
 			continue
 		}
+		cost, err := strconv.ParseFloat(hourCost, 32)
+		if err != nil {
+			return nil, err
+		}
+		dayCostsFloat = append(dayCostsFloat, float32(cost))
+	}
+	energyCost = append(energyCost, dayCostsFloat)
+
+	for i := 1; i < 7; i++ {
 		var dayCostsFloat []float32
-		for j, hourCost := range dayCosts {
+		for j, hourCost := range entries[i] {
 			if j == 0 {
 				continue
 			}
