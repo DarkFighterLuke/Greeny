@@ -3,9 +3,8 @@ package utils
 import "fmt"
 
 const (
-	ProjectId         = "greeny-ccqg"
-	ContextsBase      = "%s/contexts/%s"
-	InputContextsBase = "projects/" + ProjectId + "/agent/sessions/%s/contexts/%s"
+	ProjectId    = "greeny-ccqg"
+	ContextsBase = "%s/contexts/%s"
 )
 
 type Intent struct {
@@ -48,7 +47,8 @@ type WebhookResponse struct {
 
 func FindContextByName(contexts *[]Context, session, contextName string) (Context, error) {
 	for _, context := range *contexts {
-		if context.Name == fmt.Sprintf(InputContextsBase, session, contextName) {
+		temp := fmt.Sprintf(ContextsBase, session, contextName)
+		if context.Name == temp {
 			return context, nil
 		}
 	}
