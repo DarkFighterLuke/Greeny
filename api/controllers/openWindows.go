@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"greeny/utils"
 	"time"
 )
@@ -17,8 +18,14 @@ func OpenWindows(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 					{
 						Text: utils.Text{
 							[]string{"Fuori è più freddo, aprendo le finestre stai attuando una scelta green." +
-								" Complimenti!"},
+								" Complimenti!" + "\nPosso fare altro per te?"},
 						},
+					},
+				},
+				OutputContexts: []utils.Context{
+					{
+						Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+						LifespanCount: 1,
 					},
 				},
 			}, nil
@@ -41,8 +48,14 @@ func OpenWindows(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 					{
 						Text: utils.Text{
 							[]string{"Fuori è più caldo, aprendo le finestre stai attuando una scelta green." +
-								" Complimenti!"},
+								" Complimenti!" + "\nPosso fare altro per te?"},
 						},
+					},
+				},
+				OutputContexts: []utils.Context{
+					{
+						Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+						LifespanCount: 1,
 					},
 				},
 			}, nil

@@ -24,9 +24,16 @@ func WhatIsTheTemperature(request utils.WebhookRequest) (utils.WebhookResponse, 
 					{
 						Text: utils.Text{
 							Text: []string{
-								"Brrrr! Mi si potrebbero congelare i circuiti. " + strTemperatures,
+								"Brrrr! Mi si potrebbero congelare i circuiti. " + strTemperatures +
+									"\nPosso fare altro per te?",
 							},
 						},
+					},
+				},
+				OutputContexts: []utils.Context{
+					{
+						Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+						LifespanCount: 1,
 					},
 				},
 			}, nil
@@ -36,9 +43,16 @@ func WhatIsTheTemperature(request utils.WebhookRequest) (utils.WebhookResponse, 
 					{
 						Text: utils.Text{
 							Text: []string{
-								"Brrrr! Mi si potrebbero sciogliere i circuiti. " + strTemperatures,
+								"Che caldo! Mi si potrebbero sciogliere i circuiti. " + strTemperatures +
+									"\nPosso fare altro per te?",
 							},
 						},
+					},
+				},
+				OutputContexts: []utils.Context{
+					{
+						Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+						LifespanCount: 1,
 					},
 				},
 			}, nil
@@ -49,9 +63,15 @@ func WhatIsTheTemperature(request utils.WebhookRequest) (utils.WebhookResponse, 
 			{
 				Text: utils.Text{
 					Text: []string{
-						strTemperatures,
+						strTemperatures + "\nPosso fare altro per te?",
 					},
 				},
+			},
+		},
+		OutputContexts: []utils.Context{
+			{
+				Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+				LifespanCount: 1,
 			},
 		},
 	}, nil
