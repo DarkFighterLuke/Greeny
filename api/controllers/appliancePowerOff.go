@@ -1,17 +1,18 @@
 package controllers
 
 import (
+	"fmt"
 	"greeny/utils"
 	"os"
 	"time"
 )
 
-func PowerOff(response utils.WebhookRequest) (utils.WebhookResponse, error) {
+func PowerOff(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	user, err := utils.GetUserFolderPath()
 	if err != nil {
 		return utils.WebhookResponse{}, err
 	}
-	appliance := response.QueryResult.Parameters["appliance"].(string)
+	appliance := request.QueryResult.Parameters["appliance"].(string)
 
 	basePath := "data/" + user + "/"
 	summary, err := utils.ReadSummaryFile(basePath + "summary.csv")
@@ -83,8 +84,15 @@ func PowerOff(response utils.WebhookRequest) (utils.WebhookResponse, error) {
 			FulfillmentMessages: []utils.Message{
 				{
 					Text: utils.Text{
-						Text: []string{"L'elettrodomestico " + appliance + " è stato spento"},
+						Text: []string{"L'elettrodomestico " + appliance + " è stato spento.\n" +
+							"Posso fare altro per te?"},
 					},
+				},
+			},
+			OutputContexts: []utils.Context{
+				{
+					Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+					LifespanCount: 1,
 				},
 			},
 		}, nil
@@ -93,8 +101,15 @@ func PowerOff(response utils.WebhookRequest) (utils.WebhookResponse, error) {
 			FulfillmentMessages: []utils.Message{
 				{
 					Text: utils.Text{
-						Text: []string{"L'elettrodomestico " + appliance + " è già spento"},
+						Text: []string{"L'elettrodomestico " + appliance + " è già spento.\n" +
+							"Posso fare altro per te?"},
 					},
+				},
+			},
+			OutputContexts: []utils.Context{
+				{
+					Name:          fmt.Sprintf(utils.ContextsBase, request.Session, "can_i_do_something_else_request"),
+					LifespanCount: 1,
 				},
 			},
 		}, nil
