@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	ProjectId    = "greeny-ccqg"
-	ContextsBase = "projects/" + ProjectId + "/agent/sessions/%s/contexts/%s"
+	ContextsBase = "%s/contexts/%s"
 )
 
 type Intent struct {
@@ -45,9 +45,10 @@ type WebhookResponse struct {
 	OutputContexts      []Context `json:"outputContexts"`
 }
 
-func FindContextByName(contexts *[]Context, contextName string) (Context, error) {
+func FindContextByName(contexts *[]Context, session, contextName string) (Context, error) {
 	for _, context := range *contexts {
-		if context.Name == contextName {
+		temp := fmt.Sprintf(ContextsBase, session, contextName)
+		if context.Name == temp {
 			return context, nil
 		}
 	}

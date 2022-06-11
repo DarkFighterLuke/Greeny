@@ -53,9 +53,11 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 		// Setup - Repeat appliances
 		response, err = controllers.RepeatAppliances(request)
 	case "bef393dc-2c73-45e1-a72f-6a9235d2c92e", "7b78b8d8-fef2-43f7-8e12-c0bddf7e57fe":
-		// Appliance power on
 		// Appliance power on - Temperature request
-		response, err = controllers.AppliancePowerOn(request)
+		response, err = controllers.AppliancePowerOn(request, true)
+	case "db697b19-e3cb-422d-82de-ca70a821a92f":
+		// Appliance power on - Windows advice
+		response, err = controllers.AdviceWindows(request)
 	case "132187da-5035-45ea-ab71-6b82e04e03ae":
 		// Appliance power off
 		response, err = controllers.PowerOff(request)
@@ -65,6 +67,9 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "59c9f470-ebb6-48c2-87db-e1bb5fd1f7d5":
 		// Appliance power on - Power off lower priority appliances
 		response, err = controllers.RecommendedPowerOffConfirmation(request)
+	case "39003ad8-90cb-42ff-9241-f4a524bf28be":
+		// Appliance power on - Shiftable power on confirmation
+		response, err = controllers.ProceedToShiftablePowerOn(request)
 	case "660e8d42-a9d1-4f29-aa78-1b700771b640":
 		// Temperature info
 		response, err = controllers.WhatIsTheTemperature(request)
@@ -77,6 +82,9 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	case "187ee8f9-b9eb-4a03-86bc-6344d127490c":
 		// Open windows
 		response, err = controllers.OpenWindows(request)
+	case "9c5574a3-da98-4c94-88c7-1529cea62b51":
+		// Can I do something else
+		response, err = controllers.CanIDoSomethingElse(request)
 	default:
 		err = fmt.Errorf("Unknown intent: %s", intent)
 	}

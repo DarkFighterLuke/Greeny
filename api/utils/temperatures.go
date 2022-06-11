@@ -2,8 +2,14 @@ package utils
 
 import (
 	"encoding/csv"
+	"fmt"
+	"math"
 	"os"
 	"strconv"
+)
+
+const (
+	deltaTemperatureHealthHazardDegrees = 15
 )
 
 type Temperatures struct {
@@ -53,4 +59,63 @@ func IsColderOutside(hour int) (bool, error) {
 	} else {
 		return false, nil
 	}
+}
+
+func IsWantedTemperatureLowerThanOutside(wantedTemperature float32, hour int) (bool, error) {
+	temperatures, err := ReadTemperatures()
+	if err != nil {
+		return false, err
+	}
+
+	return wantedTemperature < temperatures.ExternalTemperatures[hour], nil
+}
+
+func IsWantedTemperatureLowerThanInside(wantedTemperature float32, hour int) (bool, error) {
+	temperatures, err := ReadTemperatures()
+	if err != nil {
+		return false, err
+	}
+
+	return wantedTemperature < temperatures.InternalTemperatures[hour], nil
+}
+
+func GetInternalTemperatureByHour(hour int) (float32, error) {
+	if hour < 0 || hour > 23 {
+		return 0, fmt.Errorf("hour out of range")
+	}
+
+	temperatures, err := ReadTemperatures()
+	if err != nil {
+		return 0, err
+	}
+
+	return temperatures.InternalTemperatures[hour], nil
+}
+
+func GetExternalTemperatureByHour(hour int) (float32, error) {
+	if hour < 0 || hour > 23 {
+		return 0, fmt.Errorf("hour out of range")
+	}
+
+	temperatures, err := ReadTemperatures()
+	if err != nil {
+		return 0, err
+	}
+
+	return temperatures.ExternalTemperatures[hour], nil
+}
+
+func IsDeltaTemperatureDangerous(wantedTemperature float32, hour int) (bool, bool, error) {
+	if hour < 0 || hour > 23 {
+		return false, false, fmt.Errorf("hour out of range")
+	}
+
+	externalTemperature, err := GetExternalTemperatureByHour(hour)
+	if err != nil {
+		return false, false, err
+	}
+
+	isWantedTooLow := externalTemperature > wantedTemperature
+
+	return math.Abs(float64(externalTemperature-wantedTemperature)) >= deltaTemperatureHealthHazardDegrees, isWantedTooLow, nil
 }
