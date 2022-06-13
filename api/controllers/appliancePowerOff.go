@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func PowerOff(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+func AppliancePowerOff(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	user, err := utils.GetUserFolderPath()
 	if err != nil {
 		return utils.WebhookResponse{}, err

@@ -60,7 +60,7 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 		response, err = controllers.AdviceWindows(request)
 	case "132187da-5035-45ea-ab71-6b82e04e03ae":
 		// Appliance power off
-		response, err = controllers.PowerOff(request)
+		response, err = controllers.AppliancePowerOff(request)
 	case "d088ed94-9df9-40c8-99b1-93ee1cab4fe7":
 		// Appliance power on - NRE usage confirmation
 		response, err = controllers.NREUsageConfirmation(request)
