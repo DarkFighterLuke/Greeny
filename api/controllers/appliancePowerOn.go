@@ -510,7 +510,8 @@ func NREUsageConfirmation(request utils.WebhookRequest) (utils.WebhookResponse, 
 			FulfillmentMessages: []utils.Message{
 				{
 					Text: utils.Text{
-						Text: []string{"Ok " + userFolderName + ", procedo all'accensione."},
+						Text: []string{"Ok " + userFolderName + ", procedo all'accensione.\n" +
+							"Posso fare altro per te?"},
 					},
 				},
 			},
