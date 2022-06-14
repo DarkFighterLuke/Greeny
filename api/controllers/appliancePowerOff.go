@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-// PowerOff this function switch off an appliance and then calculates the new optimal-schedule file.
-// It accepts an utils.WebhookRequest and return an utils.WebhookResponse and an error if it is present
-func PowerOff(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+// AppliancePowerOff this function switch off an appliance and then calculates the new optimal-schedule file.
+// It accepts an utils.WebhookRequest and return an utils.WebhookResponse and an error if it is present.
+func AppliancePowerOff(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	user, err := utils.GetUserFolderPath()
 	if err != nil {
 		return utils.WebhookResponse{}, err
