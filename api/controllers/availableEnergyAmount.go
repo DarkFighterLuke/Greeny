@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// AvailableEnergyAmount this function return an utils.WebhookRequest with the current battery residual energy, where
+// current means time.Now()
 func AvailableEnergyAmount(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	user, err := utils.GetUserFolderPath()
 	if err != nil {
@@ -22,7 +24,7 @@ func AvailableEnergyAmount(request utils.WebhookRequest) (utils.WebhookResponse,
 		FulfillmentMessages: []utils.Message{
 			{
 				Text: utils.Text{
-					[]string{"La produzione corrente di energia è di " + fmt.Sprintf("%.2f", ess[hour]) + "kW" +
+					[]string{"Le batterie hanno " + fmt.Sprintf("%.2f", ess[hour]) + "kW di energia disponibili" +
 						"\nPosso fare altro per te?"},
 				},
 			},

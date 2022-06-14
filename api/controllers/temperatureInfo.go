@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// WhatIsTheTemperature returns the internal and the external temperature.
 func WhatIsTheTemperature(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	temperatures, err := utils.ReadTemperatures()
 	if err != nil {
