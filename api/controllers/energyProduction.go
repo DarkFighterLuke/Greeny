@@ -8,7 +8,9 @@ import (
 
 var pathToPVFile = "data/pv.csv"
 
-func CurrentlyEnergyProduction(request utils.WebhookRequest) (utils.WebhookResponse, error) {
+// CurrentEnergyProduction this function return an utils.WebhookRequest with the current energy production, where
+// current means time.Now()
+func CurrentEnergyProduction(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	pvs, err := utils.ReadPV(pathToPVFile)
 	if err != nil {
 		return utils.WebhookResponse{}, err

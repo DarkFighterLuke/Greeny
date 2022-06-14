@@ -75,7 +75,7 @@ func handleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 		response, err = controllers.WhatIsTheTemperature(request)
 	case "d40cc55f-c73d-4b7b-bc6d-62248d4c94c6":
 		// Currently energy production
-		response, err = controllers.CurrentlyEnergyProduction(request)
+		response, err = controllers.CurrentEnergyProduction(request)
 	case "c86594a7-de4a-46fe-a1fb-0d66546de2b1":
 		// Available energy amount
 		response, err = controllers.AvailableEnergyAmount(request)

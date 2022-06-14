@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// OpenWindows this function check the internal and external temperature and open the windows if it is advantageous, or
+// give advice if it is not.
 func OpenWindows(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 	colder, err := utils.IsColderOutside(time.Now().Hour())
 	if err != nil {
