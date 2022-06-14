@@ -12,6 +12,8 @@ import (
 func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (utils.WebhookResponse, error) {
 	currentHour := time.Now().Hour()
 	currentDayOfWeek := int(time.Now().Weekday())
+
+	// Gets appliance name either from QueryResult or from OutputContext parameters
 	var applianceName string
 	if request.QueryResult.Parameters["appliance"] == nil {
 		context, err := utils.FindContextByName(&request.QueryResult.OutputContexts,
@@ -24,6 +26,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 		applianceName = request.QueryResult.Parameters["appliance"].(string)
 	}
 
+	// Gets temperature either from QueryResult or from OutputContext parameters
 	var temperatureParameters map[string]interface{}
 	var temperature float32
 	if request.QueryResult.Parameters["temperature"] == nil {
@@ -54,6 +57,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 		return utils.WebhookResponse{}, err
 	}
 
+	// Checks whether all appliances have been set up
 	if !utils.IsSetupCompleted(&summary) {
 		return utils.WebhookResponse{
 			FulfillmentMessages: []utils.Message{
@@ -68,11 +72,13 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 		}, nil
 	}
 
+	// Loads summary information about the given appliance
 	summaryAppliance, err := utils.FindSummaryEntryByCommonName(&summary, applianceName)
 	if err != nil {
 		return utils.WebhookResponse{}, err
 	}
 
+	// Checks whether appliance requires a temperature to be started and if it has been provided by the user
 	if summaryAppliance.NeedsTemperatureToPowerOn && temperatureParameters == nil {
 		outputContexts := request.QueryResult.OutputContexts
 		outputContexts = append(outputContexts, utils.Context{
@@ -139,6 +145,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 	powerOnContext, _ := utils.FindContextByName(&request.QueryResult.OutputContexts, request.Session, "power_on_request")
 	powerOnContext.LifespanCount = 1
 
+	// Checks if appliance is manages house temperature and if the check itself is required
 	if summaryAppliance.TemperatureSetter && doTemperatureCheck {
 		isDangerous, isWantedTooLow, err := utils.IsDeltaTemperatureDangerous(temperature, currentHour)
 		if err != nil {
@@ -230,6 +237,7 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 		}
 	}
 
+	// Checks if appliance is already on
 	isOn, err := applianceConsumptions.IsTurnedOn(currentHour)
 	if err != nil {
 		return utils.WebhookResponse{}, err
