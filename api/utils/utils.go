@@ -22,7 +22,7 @@ func GetUserFolderPath() (string, error) {
 			return false
 		}
 		infoJ, err := nodes[j].Info()
-		return infoI.ModTime().Before(infoJ.ModTime())
+		return infoI.ModTime().After(infoJ.ModTime())
 	})
 
 	for _, node := range nodes {
