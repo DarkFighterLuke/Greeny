@@ -75,7 +75,15 @@ func AppliancePowerOn(request utils.WebhookRequest, doTemperatureCheck bool) (ut
 	// Loads summary information about the given appliance
 	summaryAppliance, err := utils.FindSummaryEntryByCommonName(&summary, applianceName)
 	if err != nil {
-		return utils.WebhookResponse{}, err
+		return utils.WebhookResponse{
+			FulfillmentMessages: []utils.Message{
+				{
+					Text: utils.Text{
+						Text: []string{"Non ho trovato alcun elettrodomestico con questo nome in casa..."},
+					},
+				},
+			},
+		}, nil
 	}
 
 	// Checks whether appliance requires a temperature to be started and if it has been provided by the user
@@ -584,7 +592,15 @@ func RecommendedPowerOffConfirmation(request utils.WebhookRequest) (utils.Webhoo
 		for _, appliance := range appliancesToPowerOff {
 			summaryEntry, err := utils.FindSummaryEntryByCommonName(&summary, appliance.(string))
 			if err != nil {
-				return utils.WebhookResponse{}, err
+				return utils.WebhookResponse{
+					FulfillmentMessages: []utils.Message{
+						{
+							Text: utils.Text{
+								Text: []string{"Non ho trovato alcun elettrodomestico con questo nome in casa..."},
+							},
+						},
+					},
+				}, nil
 			}
 			if summaryEntry.Shiftable {
 				err = utils.PowerOffShiftable(userFolderName, appliance.(string), currentHour)
