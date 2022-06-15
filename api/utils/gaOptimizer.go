@@ -67,7 +67,7 @@ func GenerateOptimalSchedule(shiftablePath, nonShiftablePath, optimizedScheduleP
 		}
 	}
 
-	_, err := exec.Command("../GAEnergyOptimizer/venv/bin/python3", "../GAEnergyOptimizer/main.py", shiftablePath, nonShiftablePath, "data/user_preferred_time_slots.csv", "-o", optimizedSchedulePath).Output()
+	_, err := exec.Command("../GAEnergyOptimizer/venv/bin/python3", "../GAEnergyOptimizer/main.py", shiftablePath, nonShiftablePath, "-o", optimizedSchedulePath).Output()
 	if err != nil {
 		return err
 	}
