@@ -30,28 +30,28 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 
 		summary := utils.Summary{
 			{
-				Appliance:         "piano_cottura",
-				Shiftable:         false,
-				Priority:          1,
-				SetupDone:         false,
-				CommonName:        "Piano cottura",
-				TemperatureSetter: true,
+				Appliance:                 "piano_cottura",
+				Shiftable:                 false,
+				Priority:                  1,
+				SetupDone:                 false,
+				CommonName:                "Piano cottura",
+				NeedsTemperatureToPowerOn: true,
 			},
 			{
-				Appliance:         "forno",
-				Shiftable:         false,
-				Priority:          1,
-				SetupDone:         false,
-				CommonName:        "Forno",
-				TemperatureSetter: true,
+				Appliance:                 "forno",
+				Shiftable:                 false,
+				Priority:                  1,
+				SetupDone:                 false,
+				CommonName:                "Forno",
+				NeedsTemperatureToPowerOn: true,
 			},
 			{
-				Appliance:         "microonde",
-				Shiftable:         false,
-				Priority:          1,
-				SetupDone:         false,
-				CommonName:        "Microonde",
-				TemperatureSetter: true,
+				Appliance:                 "microonde",
+				Shiftable:                 false,
+				Priority:                  1,
+				SetupDone:                 false,
+				CommonName:                "Microonde",
+				NeedsTemperatureToPowerOn: true,
 			},
 			{
 				Appliance:  "computer",
@@ -75,44 +75,44 @@ func CreateUser(request utils.WebhookRequest) (utils.WebhookResponse, error) {
 				CommonName: "Televisione",
 			},
 			{
-				Appliance:         "scaldabagno",
-				Shiftable:         false,
-				Priority:          1,
-				SetupDone:         false,
-				CommonName:        "Scaldabagno",
-				TemperatureSetter: true,
+				Appliance:                 "scaldabagno",
+				Shiftable:                 false,
+				Priority:                  1,
+				SetupDone:                 false,
+				CommonName:                "Scaldabagno",
+				NeedsTemperatureToPowerOn: true,
 			},
 			{
-				Appliance:         "condizionatore",
-				Shiftable:         false,
-				Priority:          1,
-				SetupDone:         false,
-				CommonName:        "Condizionatore",
-				TemperatureSetter: true,
+				Appliance:                 "condizionatore",
+				Shiftable:                 false,
+				Priority:                  1,
+				SetupDone:                 false,
+				CommonName:                "Condizionatore",
+				NeedsTemperatureToPowerOn: true,
 			},
 			{
-				Appliance:         "lavatrice",
-				Shiftable:         false,
-				Priority:          1,
-				SetupDone:         false,
-				CommonName:        "Lavatrice",
-				TemperatureSetter: true,
+				Appliance:                 "lavatrice",
+				Shiftable:                 false,
+				Priority:                  1,
+				SetupDone:                 false,
+				CommonName:                "Lavatrice",
+				NeedsTemperatureToPowerOn: true,
 			},
 			{
-				Appliance:         "asciugatrice",
-				Shiftable:         false,
-				Priority:          1,
-				SetupDone:         false,
-				CommonName:        "Asciugatrice",
-				TemperatureSetter: true,
+				Appliance:                 "asciugatrice",
+				Shiftable:                 false,
+				Priority:                  1,
+				SetupDone:                 false,
+				CommonName:                "Asciugatrice",
+				NeedsTemperatureToPowerOn: true,
 			},
 			{
-				Appliance:         "lavastoviglie",
-				Shiftable:         false,
-				Priority:          1,
-				SetupDone:         false,
-				CommonName:        "Lavastoviglie",
-				TemperatureSetter: true,
+				Appliance:                 "lavastoviglie",
+				Shiftable:                 false,
+				Priority:                  1,
+				SetupDone:                 false,
+				CommonName:                "Lavastoviglie",
+				NeedsTemperatureToPowerOn: true,
 			},
 			{
 				Appliance:  "aspirapolvere",
@@ -412,6 +412,11 @@ func TemperatureSetters(request utils.WebhookRequest) (utils.WebhookResponse, er
 				}, nil
 			}
 			entry.TemperatureSetter = true
+		}
+
+		err = utils.WriteToCsv(&summary, path)
+		if err != nil {
+			return utils.WebhookResponse{}, err
 		}
 
 		err = utils.GenerateConsumptionsFiles()
